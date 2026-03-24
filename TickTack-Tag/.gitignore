@@ -97,3 +97,22 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# =========================
+# NODE.JS (Backend Multijugador)
+# =========================
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+
+# =========================
+# PYTHON / ML-AGENTS (Entrenament IA)
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+# Ignorar els logs d'entrenament de TensorBoard (pesen molt)
+results/*/events.out.tfevents.*
