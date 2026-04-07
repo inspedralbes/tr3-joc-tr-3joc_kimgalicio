@@ -4,34 +4,43 @@ using System;
 [CreateAssetMenu(menuName = "Game/Game State")]
 public class GameStateSO : ScriptableObject
 {
-    public int MaxLives = 5;
+    [Header("Game Settings")]
+    public float InitialTimer = 30f;
 
-    [NonSerialized] public int Score;
-    [NonSerialized] public int Lives;
+    [Header("Runtime State")]
+    [NonSerialized] public float GameTimer;
+    [NonSerialized] public GameObject CurrentBombOwner;
     [NonSerialized] public bool GameOver;
+    [NonSerialized] public string WinnerName;
 
     public event Action OnChanged;
 
     public void ResetRun()
     {
-        Score = 0;
-        Lives = MaxLives;
+        GameTimer = InitialTimer;
+        CurrentBombOwner = null;
         GameOver = false;
+        WinnerName = "";
         OnChanged?.Invoke();
     }
 
-    public void AddScore(int amount)
+    public void SetGameOver(string winner)
     {
-        if (GameOver) return;
-        Score += amount;
+        GameOver = true;
+        WinnerName = winner;
         OnChanged?.Invoke();
     }
 
-    public void TakeDamage(int amount)
+    public void UpdateTimer(float deltaTime)
     {
         if (GameOver) return;
-        Lives = Mathf.Max(0, Lives - amount);
-        if (Lives == 0) GameOver = true;
+        GameTimer = Mathf.Max(0, GameTimer - deltaTime);
+        OnChanged?.Invoke();
+    }
+
+    public void SetBombOwner(GameObject owner)
+    {
+        CurrentBombOwner = owner;
         OnChanged?.Invoke();
     }
 }
