@@ -10,11 +10,12 @@ public class PlayerModeController2D : MonoBehaviour
 
     [Header("Mode")]
     [SerializeField] private GameMode mode = GameMode.Platformer;
-    [SerializeField] private bool useAiInput = false;
+    [SerializeField] public bool useAiInput = false;
 
     [Header("Movement")]
     [SerializeField] private float topDownSpeed = 4f;
     [SerializeField] private float platformerSpeed = 6f;
+    private float _currentSpeedMultiplier = 1f;
 
     [Header("Jump (Platformer only)")]
     [SerializeField] private float jumpImpulse = 9f;
@@ -33,33 +34,26 @@ public class PlayerModeController2D : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         ApplyModeSettings();
+        if (GameState != null) GameState.InitializeEntity(gameObject.name);
     }
 
     void Update()
     {
-        if (GameState != null && GameState.GameOver)
+        if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name)))
         {
             input = Vector2.zero;
             jumpRequested = false;
-            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            rb.linearVelocity = Vector2.zero;
             return;
         }
 
         if (!useAiInput)
         {
-            // Input WASD / fletxes
             input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
             if (mode == GameMode.Platformer && Input.GetKeyDown(KeyCode.Space))
             {
                 jumpRequested = true;
-            }
-
-            // Toggle mode with '0' for debugging
-            if (Input.GetKeyDown(KeyCode.Alpha0))
-            {
-                mode = (mode == GameMode.TopDown) ? GameMode.Platformer : GameMode.TopDown;
-                ApplyModeSettings();
             }
         }
 
@@ -73,16 +67,18 @@ public class PlayerModeController2D : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name))) return;
+
+        float effectiveSpeed = (mode == GameMode.TopDown ? topDownSpeed : platformerSpeed) * _currentSpeedMultiplier;
+
         if (mode == GameMode.TopDown)
         {
-            Vector2 move = input.normalized * topDownSpeed;
-            Vector2 nextPos = rb.position + move * Time.fixedDeltaTime;
-            rb.MovePosition(nextPos);
+            Vector2 move = input.normalized * effectiveSpeed;
+            rb.MovePosition(rb.position + move * Time.fixedDeltaTime);
         }
         else
         {
-            float x = input.x;
-            rb.linearVelocity = new Vector2(x * platformerSpeed, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(input.x * effectiveSpeed, rb.linearVelocity.y);
 
             if (jumpRequested)
             {
@@ -96,6 +92,16 @@ public class PlayerModeController2D : MonoBehaviour
         }
     }
 
+    public void ApplySpeedMultiplier(float multiplier)
+    {
+        _currentSpeedMultiplier = multiplier;
+    }
+
+    public void ResetSpeedMultiplier()
+    {
+        _currentSpeedMultiplier = 1f;
+    }
+
     public void SetInput(float horizontal, float vertical, bool jump)
     {
         if (!useAiInput) return;
@@ -105,19 +111,8 @@ public class PlayerModeController2D : MonoBehaviour
 
     private void ApplyModeSettings()
     {
-        if (mode == GameMode.TopDown)
-        {
-            rb.gravityScale = 0f;
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            rb.linearVelocity = Vector2.zero;
-            rb.angularVelocity = 0f;
-        }
-        else
-        {
-            rb.gravityScale = 1f;
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            rb.angularVelocity = 0f;
-        }
+        rb.gravityScale = (mode == GameMode.TopDown) ? 0f : 1f;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     private bool IsGrounded()
@@ -125,14 +120,4 @@ public class PlayerModeController2D : MonoBehaviour
         if (groundCheck == null) return false;
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
     }
-
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
-    {
-        if (groundCheck == null) return;
-        Collider2D hit = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        Gizmos.color = (hit != null) ? Color.green : Color.red;
-        Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
-    }
-#endif
 }

@@ -1,12 +1,25 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Bomb : MonoBehaviour
 {
     public GameStateSO GameState;
     public float TransferCooldown = 1.0f;
+    public float SpeedMultiplier = 1.15f;
     public Vector3 Offset = new Vector3(0, 1.5f, 0);
 
+    // Referència visual de la bomba sobre el cap
+    public GameObject BombIndicatorPrefab;
+    private Dictionary<GameObject, GameObject> _indicators = new Dictionary<GameObject, GameObject>();
     private float _lastTransferTime;
+
+    void Start()
+    {
+        if (GameState != null && GameState.CurrentBombOwner != null)
+        {
+            ApplyBombState(GameState.CurrentBombOwner);
+        }
+    }
 
     void Update()
     {
@@ -14,25 +27,110 @@ public class Bomb : MonoBehaviour
 
         if (GameState.CurrentBombOwner != null)
         {
-            // Follow the owner
+            // La bomba física segueix al propietari (per visualitzar o per col·lisions)
             transform.position = GameState.CurrentBombOwner.transform.position + Offset;
+            
+            // Si el temps s'acaba, explota en el propietari actual
+            if (GameState.GameTimer <= 0)
+            {
+                Explode();
+            }
         }
+    }
+
+    private void Explode()
+    {
+        if (GameState.GameOver) return;
+        
+        GameObject loser = GameState.CurrentBombOwner;
+        Debug.Log($"BOMBA EXPLOTA! {loser.name} perd una vida.");
+        
+        // El GameManager s'encarregarà de la resta (restar vida, respawn, etc.)
+        // Només enviem un missatge o activem un esdeveniment
+        FindObjectOfType<GameManager>().HandleDeath(loser);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (GameState == null || GameState.GameOver) return;
+        
+        // Ignorar espectadors
+        if (GameState.Spectators.Contains(other.gameObject.name)) return;
 
-        // Check if the entity that touched us is NOT the current owner
-        if (other.gameObject != GameState.CurrentBombOwner)
+        // Si l'entitat que ens toca NO és el propietari actual
+        if (other.CompareTag("Player") || other.CompareTag("Bot")) // Assumint tags
         {
-            // Cooldown check
-            if (Time.time - _lastTransferTime < TransferCooldown) return;
+            if (other.gameObject != GameState.CurrentBombOwner)
+            {
+                if (Time.time - _lastTransferTime < TransferCooldown) return;
 
-            // Transfer bomb
-            Debug.Log($"Bomb transferred to {other.gameObject.name}");
-            GameState.SetBombOwner(other.gameObject);
-            _lastTransferTime = Time.time;
+                TransferTo(other.gameObject);
+            }
         }
+    }
+
+    public void TransferTo(GameObject newOwner)
+    {
+        if (GameState.CurrentBombOwner != null)
+        {
+            RemoveBombState(GameState.CurrentBombOwner);
+        }
+
+        GameState.SetBombOwner(newOwner);
+        ApplyBombState(newOwner);
+        _lastTransferTime = Time.time;
+        Debug.Log($"Bomba transferida a {newOwner.name}");
+    }
+
+    private void ApplyBombState(GameObject owner)
+    {
+        // 1. Activar indicador visual (bola sobre el cap)
+        if (BombIndicatorPrefab != null)
+        {
+            GameObject indicator = Instantiate(BombIndicatorPrefab, owner.transform);
+            indicator.transform.localPosition = Offset;
+            _indicators[owner] = indicator;
+        }
+
+        // 2. Aplicar outline vermell (si tenen SpriteRenderer)
+        var sr = owner.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            // Per simplicitat, assumim que el shader té una propietat _OutlineColor o similar
+            // O simplement canviem el color del material si és un shader d'outline
+            sr.material.SetColor("_OutlineColor", Color.red);
+        }
+
+        // 3. Multiplicar velocitat
+        // Intentem trobar el controlador de moviment (Player o Bot)
+        var playerCtrl = owner.GetComponent<PlayerModeController2D>();
+        if (playerCtrl != null) playerCtrl.ApplySpeedMultiplier(SpeedMultiplier);
+        
+        var botCtrl = owner.GetComponent<BotController>();
+        if (botCtrl != null) botCtrl.ApplySpeedMultiplier(SpeedMultiplier);
+    }
+
+    private void RemoveBombState(GameObject owner)
+    {
+        // 1. Destruir indicador
+        if (_indicators.ContainsKey(owner))
+        {
+            Destroy(_indicators[owner]);
+            _indicators.Remove(owner);
+        }
+
+        // 2. Tornar outline a negre
+        var sr = owner.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.material.SetColor("_OutlineColor", Color.black);
+        }
+
+        // 3. Reset velocitat
+        var playerCtrl = owner.GetComponent<PlayerModeController2D>();
+        if (playerCtrl != null) playerCtrl.ResetSpeedMultiplier();
+
+        var botCtrl = owner.GetComponent<BotController>();
+        if (botCtrl != null) botCtrl.ResetSpeedMultiplier();
     }
 }

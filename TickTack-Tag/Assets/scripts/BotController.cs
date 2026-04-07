@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class BotController : MonoBehaviour
 {
@@ -10,9 +11,23 @@ public class BotController : MonoBehaviour
     private float _horizontalInput;
     private bool _jumpInput;
 
+    void Start()
+    {
+        if (GameState != null) GameState.InitializeEntity(gameObject.name);
+    }
+
     void Update()
     {
         if (GameState == null || GameState.GameOver || Controller == null) return;
+        
+        // Si sóc espectador, no faig res
+        if (GameState.Spectators.Contains(gameObject.name))
+        {
+            _horizontalInput = 0f;
+            _jumpInput = false;
+            Controller.SetInput(0, 0, false);
+            return;
+        }
 
         if (Time.time >= _nextDecisionTime)
         {
@@ -20,55 +35,55 @@ public class BotController : MonoBehaviour
             _nextDecisionTime = Time.time + DecisionInterval;
         }
 
-        // Apply input to the controller
         Controller.SetInput(_horizontalInput, 0f, _jumpInput);
-        _jumpInput = false; // Reset jump input after sending
+        _jumpInput = false;
     }
 
     private void MakeDecision()
     {
-        GameObject bombOwner = GameState.CurrentBombOwner;
-        if (bombOwner == null) return;
+        if (GameState.CurrentBombOwner == null) return;
 
-        bool hasBomb = (bombOwner == gameObject);
+        bool hasBomb = (GameState.CurrentBombOwner == gameObject);
 
         if (hasBomb)
         {
-            ChaseClosestPlayer();
+            ChaseClosestTarget();
         }
         else
         {
-            FleeFromBombOwner(bombOwner);
+            FleeFromBombOwner(GameState.CurrentBombOwner);
         }
     }
 
-    private void ChaseClosestPlayer()
+    private void ChaseClosestTarget()
     {
-        // Find closest entity that is NOT me
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        GameObject[] bots = GameObject.FindGameObjectsWithTag("Bot");
+        
+        List<GameObject> allTargets = new List<GameObject>(players);
+        allTargets.AddRange(bots);
+
         GameObject closest = null;
         float minDistance = float.MaxValue;
 
-        foreach (var p in players)
+        foreach (var t in allTargets)
         {
-            if (p == gameObject) continue;
-            float dist = Vector3.Distance(transform.position, p.transform.position);
+            if (t == gameObject) continue;
+            // Ignorar espectadors
+            if (GameState.Spectators.Contains(t.name)) continue;
+
+            float dist = Vector3.Distance(transform.position, t.transform.position);
             if (dist < minDistance)
             {
                 minDistance = dist;
-                closest = p;
+                closest = t;
             }
         }
 
         if (closest != null)
         {
             _horizontalInput = (closest.transform.position.x > transform.position.x) ? 1f : -1f;
-            
-            // Basic jump if we are close to the target or there's a height difference
-            if (Mathf.Abs(closest.transform.position.y - transform.position.y) > 1.0f)
-            {
-                _jumpInput = true;
-            }
+            if (Mathf.Abs(closest.transform.position.y - transform.position.y) > 1.5f) _jumpInput = true;
         }
     }
 
@@ -76,17 +91,24 @@ public class BotController : MonoBehaviour
     {
         float dist = Vector3.Distance(transform.position, owner.transform.position);
         
-        // Only flee if the owner is reasonably close
-        if (dist < 10.0f)
+        if (dist < 12.0f)
         {
             _horizontalInput = (owner.transform.position.x > transform.position.x) ? -1f : 1f;
-            
-            // Jump randomly to evade
-            if (Random.value < 0.1f) _jumpInput = true;
+            if (Random.value < 0.05f) _jumpInput = true;
         }
         else
         {
-            _horizontalInput = Mathf.Lerp(_horizontalInput, 0f, Time.deltaTime);
+            _horizontalInput = 0f;
         }
+    }
+
+    public void ApplySpeedMultiplier(float multiplier)
+    {
+        if (Controller != null) Controller.ApplySpeedMultiplier(multiplier);
+    }
+
+    public void ResetSpeedMultiplier()
+    {
+        if (Controller != null) Controller.ResetSpeedMultiplier();
     }
 }
