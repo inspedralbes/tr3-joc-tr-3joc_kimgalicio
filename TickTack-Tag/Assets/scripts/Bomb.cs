@@ -12,9 +12,11 @@ public class Bomb : MonoBehaviour
     public GameObject BombIndicatorPrefab;
     private Dictionary<GameObject, GameObject> _indicators = new Dictionary<GameObject, GameObject>();
     private float _lastTransferTime;
+    private GameManager _gameManager;
 
     void Start()
     {
+        _gameManager = FindObjectOfType<GameManager>();
         if (GameState != null && GameState.CurrentBombOwner != null)
         {
             ApplyBombState(GameState.CurrentBombOwner);
@@ -27,10 +29,21 @@ public class Bomb : MonoBehaviour
 
         if (GameState.CurrentBombOwner != null)
         {
-            // La bomba física segueix al propietari (per visualitzar o per col·lisions)
+            // Seguir al propietari
             transform.position = GameState.CurrentBombOwner.transform.position + Offset;
+
+            // Feedback visual: escala segons el temps
+            // Creixem un 50% extra quan estem a punt d'explotar
+            float t = 1f - (GameState.GameTimer / GameState.InitialTimer);
+            float scale = 1f + (t * 0.5f); 
             
-            // Si el temps s'acaba, explota en el propietari actual
+            // Si queden menys de 3 segons, vibració/bateg ràpid
+            if (GameState.GameTimer < 3f)
+            {
+                scale += Mathf.Sin(Time.time * 25f) * 0.15f;
+            }
+            transform.localScale = new Vector3(scale, scale, 1f);
+            
             if (GameState.GameTimer <= 0)
             {
                 Explode();
@@ -46,8 +59,7 @@ public class Bomb : MonoBehaviour
         Debug.Log($"BOMBA EXPLOTA! {loser.name} perd una vida.");
         
         // El GameManager s'encarregarà de la resta (restar vida, respawn, etc.)
-        // Només enviem un missatge o activem un esdeveniment
-        FindObjectOfType<GameManager>().HandleDeath(loser);
+        if (_gameManager != null) _gameManager.HandleDeath(loser);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

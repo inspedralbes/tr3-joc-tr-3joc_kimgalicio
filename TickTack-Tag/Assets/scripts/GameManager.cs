@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour
         GameState.ResetRun();
         foreach (var entity in Entities)
         {
-            GameState.InitializeEntity(entity.name);
+            if (entity != null) GameState.InitializeEntity(entity.name);
         }
         StartRound();
     }
@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
         // Respawn i reactivar a tothom
         for (int i = 0; i < Entities.Length; i++)
         {
-            ResetEntity(Entities[i], i);
+            if (Entities[i] != null) ResetEntity(Entities[i], i);
         }
 
         // Assignar bomba aleatòriament a algú viu
@@ -46,7 +46,16 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (GameState == null || GameState.GameOver || _isTransitioning) return;
+        if (GameState == null) return;
+
+        // Reiniciar joc amb la tecla R si ha acabat
+        if (GameState.GameOver && Input.GetKeyDown(KeyCode.R))
+        {
+            InitializeGame();
+            return;
+        }
+
+        if (GameState.GameOver || _isTransitioning) return;
 
         GameState.UpdateTimer(Time.deltaTime);
         
@@ -169,6 +178,11 @@ public class GameManager : MonoBehaviour
 
         if (candidates.Count > 0)
         {
+            GameObject newOwner = candidates[Random.Range(0, candidates.Count)];
+            if (GameBomb != null) GameBomb.TransferTo(newOwner);
+        }
+    }
+}
             GameObject newOwner = candidates[Random.Range(0, candidates.Count)];
             FindObjectOfType<Bomb>().TransferTo(newOwner);
         }
