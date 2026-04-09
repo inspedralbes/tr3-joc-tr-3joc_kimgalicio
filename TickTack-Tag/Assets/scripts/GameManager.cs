@@ -178,13 +178,12 @@ public class GameManager : MonoBehaviour
 
         if (candidates.Count > 0)
         {
-            GameObject newOwner = candidates[Random.Range(0, candidates.Count)];
-            if (GameBomb != null) GameBomb.TransferTo(newOwner);
-        }
-    }
-}
-            GameObject newOwner = candidates[Random.Range(0, candidates.Count)];
-            FindObjectOfType<Bomb>().TransferTo(newOwner);
+            GameObject newOwner = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            Bomb bomb = FindFirstObjectByType<Bomb>();
+            if (bomb != null)
+            {
+                bomb.TransferTo(newOwner);
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ public class Bomb : MonoBehaviour
 
     void Start()
     {
-        _gameManager = FindObjectOfType<GameManager>();
+        _gameManager = FindFirstObjectByType<GameManager>();
         if (GameState != null && GameState.CurrentBombOwner != null)
         {
             ApplyBombState(GameState.CurrentBombOwner);
