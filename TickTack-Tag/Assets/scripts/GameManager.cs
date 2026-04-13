@@ -68,6 +68,11 @@ public class GameManager : MonoBehaviour
         if (_isTransitioning || GameState.GameOver) return;
 
         Debug.Log($"{deadEntity.name} ha mort!");
+        
+        // Activar animación de daño si es un jugador
+        var controller = deadEntity.GetComponent<PlayerModeController2D>();
+        if (controller != null) controller.TriggerDamage();
+
         GameState.SubtractLife(deadEntity.name);
 
         // Comprovar si algú s'ha quedat a 0 vides (Fi del joc total)

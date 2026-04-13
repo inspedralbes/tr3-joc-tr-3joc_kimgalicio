@@ -23,8 +23,16 @@ public class PlayerModeController2D : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.12f;
     [SerializeField] private LayerMask groundLayer;
 
-    [Header("Animator Reference")]
+    [Header("Animator & Visuals")]
     [SerializeField] private Animator animator;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+
+    private string _currentAnimState;
+    private const string ANIM_IDLE = "Player_Vita";
+    private const string ANIM_WALK = "Vita_Walk";
+    private const string ANIM_JUMP = "Vita_Jump";
+    private const string ANIM_FALL = "Vita_Fall";
+    private const string ANIM_DAMAGE = "Vita_Damage";
 
     private Rigidbody2D rb;
     private Vector2 input;
@@ -59,9 +67,55 @@ public class PlayerModeController2D : MonoBehaviour
 
         if (animator != null)
         {
-            animator.SetFloat("x", input.normalized.x);
-            animator.SetFloat("y", input.normalized.y);
-            animator.SetFloat("speed", Mathf.Abs(input.normalized.x) + Mathf.Abs(input.normalized.y));
+            UpdateAnimations();
+        }
+    }
+
+    private void UpdateAnimations()
+    {
+        string newState;
+
+        if (!IsGrounded())
+        {
+            if (rb.linearVelocity.y > 0.1f)
+                newState = ANIM_JUMP;
+            else if (rb.linearVelocity.y < -0.1f)
+                newState = ANIM_FALL;
+            else
+                newState = _currentAnimState; // Mantener el anterior si estamos en el ápice
+        }
+        else
+        {
+            if (Mathf.Abs(input.x) > 0.01f || (mode == GameMode.TopDown && Mathf.Abs(input.y) > 0.01f))
+                newState = ANIM_WALK;
+            else
+                newState = ANIM_IDLE;
+        }
+
+        ChangeAnimationState(newState);
+
+        // Girar el personaje
+        if (spriteRenderer != null && input.x != 0)
+        {
+            spriteRenderer.flipX = input.x < 0;
+        }
+    }
+
+    private void ChangeAnimationState(string newState)
+    {
+        if (_currentAnimState == newState) return;
+
+        animator.Play(newState);
+        _currentAnimState = newState;
+    }
+
+    public void TriggerDamage()
+    {
+        if (animator != null)
+        {
+            ChangeAnimationState(ANIM_DAMAGE);
+            // Opcional: Podríamos volver a idle después de un tiempo si no hay más inputs, 
+            // pero el estado se actualizará en el próximo Update() basándose en el movimiento.
         }
     }
 
@@ -119,5 +173,14 @@ public class PlayerModeController2D : MonoBehaviour
     {
         if (groundCheck == null) return false;
         return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
     }
 }
