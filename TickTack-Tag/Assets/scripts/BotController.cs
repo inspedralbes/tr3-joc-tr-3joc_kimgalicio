@@ -1,7 +1,10 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.MLAgents;
+using Unity.MLAgents.Sensors;
+using Unity.MLAgents.Actuators;
 
-public class BotController : MonoBehaviour
+public class BotController : Agent
 {
     public GameStateSO GameState;
     public PlayerModeController2D Controller;
@@ -31,12 +34,88 @@ public class BotController : MonoBehaviour
 
         if (Time.time >= _nextDecisionTime)
         {
-            MakeDecision();
+            RequestDecision();
             _nextDecisionTime = Time.time + DecisionInterval;
         }
 
         Controller.SetInput(_horizontalInput, 0f, _jumpInput);
         _jumpInput = false;
+    }
+
+    public override void OnEpisodeBegin()
+    {
+        // Reset bot state if needed
+        _horizontalInput = 0f;
+        _jumpInput = false;
+    }
+
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        // Add observations
+        sensor.AddObservation(transform.position.x);
+        sensor.AddObservation(transform.position.y);
+        
+        // Bomb owner
+        bool hasBomb = (GameState.CurrentBombOwner == gameObject);
+        sensor.AddObservation(hasBomb ? 1f : 0f);
+        
+        // Distance to bomb owner
+        if (GameState.CurrentBombOwner != null)
+        {
+            float distToBomb = Vector3.Distance(transform.position, GameState.CurrentBombOwner.transform.position);
+            sensor.AddObservation(distToBomb);
+        }
+        else
+        {
+            sensor.AddObservation(0f);
+        }
+        
+        // Distances to other players
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        GameObject[] bots = GameObject.FindGameObjectsWithTag("Bot");
+        
+        List<GameObject> allTargets = new List<GameObject>(players);
+        allTargets.AddRange(bots);
+        
+        foreach (var t in allTargets)
+        {
+            if (t == gameObject) continue;
+            if (GameState.Spectators.Contains(t.name)) continue;
+            float dist = Vector3.Distance(transform.position, t.transform.position);
+            sensor.AddObservation(dist);
+        }
+    }
+
+    public override void OnActionReceived(ActionBuffers actions)
+    {
+        _horizontalInput = actions.ContinuousActions[0]; // -1 to 1
+        _jumpInput = actions.DiscreteActions[0] == 1; // 0 or 1
+        
+        // Rewards
+        if (GameState.CurrentBombOwner == gameObject)
+        {
+            // Reward for having bomb
+            AddReward(0.01f);
+        }
+        else
+        {
+            // Penalty for not having bomb
+            AddReward(-0.01f);
+        }
+        
+        // If tagged someone, big reward
+        // Assuming GameState has some way to track tags, but for now, placeholder
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var continuousActionsOut = actionsOut.ContinuousActions;
+        var discreteActionsOut = actionsOut.DiscreteActions;
+        
+        // Use the old logic for heuristic
+        MakeDecision();
+        continuousActionsOut[0] = _horizontalInput;
+        discreteActionsOut[0] = _jumpInput ? 1 : 0;
     }
 
     private void MakeDecision()
