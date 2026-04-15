@@ -8,6 +8,9 @@ public class GameManager : MonoBehaviour
     public GameObject[] Entities; // Jugadors i Bots
     public Transform[] SpawnPoints;
 
+    [Header("Bomba Config")]
+    [SerializeField] private bool forceBotStart = true; // Si es true, el Bot empieza siempre la partida con la bomba
+
     private bool _isTransitioning = false;
 
     void Start()
@@ -38,8 +41,8 @@ public class GameManager : MonoBehaviour
             if (Entities[i] != null) ResetEntity(Entities[i], i);
         }
 
-        // Assignar bomba aleatòriament a algú viu
-        AssignRandomBomb();
+        // Assignar bomba (Forçat al Bot o aleatori segons config)
+        AssignStartingBomb();
         
         Debug.Log("Nova Ronda Començada!");
     }
@@ -58,9 +61,6 @@ public class GameManager : MonoBehaviour
         if (GameState.GameOver || _isTransitioning) return;
 
         GameState.UpdateTimer(Time.deltaTime);
-        
-        // La bomba explota automàticament des de Bomb.cs quan el timer arriba a 0,
-        // cridant a HandleDeath()
     }
 
     public void HandleDeath(GameObject deadEntity)
@@ -87,23 +87,20 @@ public class GameManager : MonoBehaviour
         {
             StartCoroutine(RoundResetCoroutine());
         }
-        else if (Entities.Length == 3)
+        else if (Entities.Length >= 3)
         {
             // Sistema d'espectador
-            if (GameState.Spectators.Count == 0)
+            if (GameState.Spectators.Count < Entities.Length - 2)
             {
-                // Primer mort de la ronda -> Espectador
                 SetSpectator(deadEntity);
                 
-                // Si la bomba era del mort, passar-la a un altre
                 if (GameState.CurrentBombOwner == deadEntity)
                 {
-                    AssignRandomBomb();
+                    AssignStartingBomb();
                 }
             }
             else
             {
-                // Segon mort de la ronda -> Reset ronda
                 StartCoroutine(RoundResetCoroutine());
             }
         }
@@ -112,7 +109,6 @@ public class GameManager : MonoBehaviour
     private void EndGame(string loserName)
     {
         _isTransitioning = true;
-        // El guanyador és el que té més vides o l'últim que queda (simplificat)
         string winnerName = "Ningú";
         int maxLives = -1;
         foreach (var entity in Entities)
@@ -139,13 +135,10 @@ public class GameManager : MonoBehaviour
     private void SetSpectator(GameObject entity)
     {
         GameState.Spectators.Add(entity.name);
-        
-        // Desactivar visualment i físicament
         entity.GetComponent<SpriteRenderer>().enabled = false;
         entity.GetComponent<Collider2D>().enabled = false;
         var rb = entity.GetComponent<Rigidbody2D>();
         if (rb != null) rb.simulated = false;
-        
         Debug.Log($"{entity.name} ara és espectador.");
     }
 
@@ -165,29 +158,50 @@ public class GameManager : MonoBehaviour
             entity.transform.position = SpawnPoints[index].position;
         }
         
-        // Reset multiplicador de velocitat si existeix
         var p = entity.GetComponent<PlayerModeController2D>();
         if (p != null) p.ResetSpeedMultiplier();
     }
 
-    private void AssignRandomBomb()
+    private void AssignStartingBomb()
     {
         List<GameObject> candidates = new List<GameObject>();
+        GameObject botEntity = null;
+
         foreach (var entity in Entities)
         {
+            if (entity == null) continue;
+
             if (!GameState.Spectators.Contains(entity.name))
             {
                 candidates.Add(entity);
+                
+                // Buscamos al Bot por nombre o por Tag
+                if (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot"))
+                {
+                    botEntity = entity;
+                }
             }
         }
 
         if (candidates.Count > 0)
         {
-            GameObject newOwner = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            GameObject newOwner = null;
+
+            // Si forzamos al Bot y existe, se la damos a él. Si no, aleatorio.
+            if (forceBotStart && botEntity != null)
+            {
+                newOwner = botEntity;
+            }
+            else
+            {
+                newOwner = candidates[Random.Range(0, candidates.Count)];
+            }
+
             Bomb bomb = FindFirstObjectByType<Bomb>();
-            if (bomb != null)
+            if (bomb != null && newOwner != null)
             {
                 bomb.TransferTo(newOwner);
+                Debug.Log($"Bomba asignada a: {newOwner.name}");
             }
         }
     }

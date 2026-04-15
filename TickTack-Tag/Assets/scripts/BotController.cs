@@ -6,16 +6,29 @@ using Unity.MLAgents.Actuators;
 
 public class BotController : Agent
 {
+    [Header("Configuració de Referències")]
     public GameStateSO GameState;
     public PlayerModeController2D Controller;
-    public float DecisionInterval = 0.2f;
+    public LayerMask ladderLayer;
+
+    [Header("Ajustes de IA")]
+    public float DecisionInterval = 0.1f;
+    public float ladderCheckRadius = 0.3f;
 
     private float _nextDecisionTime;
     private float _horizontalInput;
+    private float _verticalInput;
     private bool _jumpInput;
+    private bool _isNearLadder;
 
-    void Start()
+    // --- INICIALIZACIÓ ---
+
+    public override void Initialize()
     {
+        // Si no está asignado en el inspector, lo busca en el mismo objeto
+        if (Controller == null) Controller = GetComponent<PlayerModeController2D>();
+        
+        // Inicializamos la entidad en el GameState para tener vidas
         if (GameState != null) GameState.InitializeEntity(gameObject.name);
     }
 
@@ -23,43 +36,55 @@ public class BotController : Agent
     {
         if (GameState == null || GameState.GameOver || Controller == null) return;
         
-        // Si sóc espectador, no faig res
+        // Si sóc espectador (mort), no faig res i em quedo quiet
         if (GameState.Spectators.Contains(gameObject.name))
         {
             _horizontalInput = 0f;
+            _verticalInput = 0f;
             _jumpInput = false;
             Controller.SetInput(0, 0, false);
             return;
         }
 
+        // Sol·licitar decisió al "Cerebro" de ML-Agents segons l'interval
         if (Time.time >= _nextDecisionTime)
         {
             RequestDecision();
             _nextDecisionTime = Time.time + DecisionInterval;
         }
 
-        Controller.SetInput(_horizontalInput, 0f, _jumpInput);
+        // Enviem els inputs calculats per la IA al controlador físic
+        Controller.SetInput(_horizontalInput, _verticalInput, _jumpInput);
+        
+        // Reset del salt per evitar que es quedi polsat en el següent frame físic
         _jumpInput = false;
     }
 
     public override void OnEpisodeBegin()
     {
-        // Reset bot state if needed
+        // Reset d'estat del bot al començar un nou episodi d'entrenament
         _horizontalInput = 0f;
+        _verticalInput = 0f;
         _jumpInput = false;
     }
 
+    // --- OBSERVACIONS (El que el Bot percep del món) ---
+
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Add observations
+        // 1. Posició pròpia (X, Y) - 2 observacions
         sensor.AddObservation(transform.position.x);
         sensor.AddObservation(transform.position.y);
-        
-        // Bomb owner
+
+        // 2. Estat de la bomba: Qui la té? - 1 observació
         bool hasBomb = (GameState.CurrentBombOwner == gameObject);
         sensor.AddObservation(hasBomb ? 1f : 0f);
-        
-        // Distance to bomb owner
+
+        // 3. Detecció d'escaleres: Estic a sobre d'una? - 1 observació
+        _isNearLadder = Physics2D.OverlapCircle(transform.position, ladderCheckRadius, ladderLayer);
+        sensor.AddObservation(_isNearLadder ? 1f : 0f);
+
+        // 4. Distància al propietari actual de la bomba - 1 observació
         if (GameState.CurrentBombOwner != null)
         {
             float distToBomb = Vector3.Distance(transform.position, GameState.CurrentBombOwner.transform.position);
@@ -69,8 +94,8 @@ public class BotController : Agent
         {
             sensor.AddObservation(0f);
         }
-        
-        // Distances to other players
+
+        // 5. Distàncies i posicions relatives a tots els altres jugadors/bots vius
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
         GameObject[] bots = GameObject.FindGameObjectsWithTag("Bot");
         
@@ -81,104 +106,70 @@ public class BotController : Agent
         {
             if (t == gameObject) continue;
             if (GameState.Spectators.Contains(t.name)) continue;
-            float dist = Vector3.Distance(transform.position, t.transform.position);
-            sensor.AddObservation(dist);
+
+            // Enviem la posició relativa (direcció i distància) - 2 observacions per cada objectiu
+            Vector2 relativePos = (Vector2)t.transform.position - (Vector2)transform.position;
+            sensor.AddObservation(relativePos.x);
+            sensor.AddObservation(relativePos.y);
         }
     }
 
+    // --- ACCIONS (El que el Bot decideix fer) ---
+
     public override void OnActionReceived(ActionBuffers actions)
     {
-        _horizontalInput = actions.ContinuousActions[0]; // -1 to 1
-        _jumpInput = actions.DiscreteActions[0] == 1; // 0 or 1
-        
-        // Rewards
+        // Acció Contínua 0: Moviment horitzontal (-1 a 1)
+        _horizontalInput = actions.ContinuousActions[0];
+
+        // Acció Discreta Branch 0: Salt (0: No, 1: Sí)
+        _jumpInput = actions.DiscreteActions[0] == 1;
+
+        // Acció Discreta Branch 1: Moviment Vertical / Escaleres (0: Res, 1: Amunt, 2: Avall)
+        int verticalAction = actions.DiscreteActions[1];
+        if (verticalAction == 1) _verticalInput = 1f;
+        else if (verticalAction == 2) _verticalInput = -1f;
+        else _verticalInput = 0f;
+
+        // --- SISTEMA DE RECOMPENSES ---
+
         if (GameState.CurrentBombOwner == gameObject)
         {
-            // Reward for having bomb
-            AddReward(0.01f);
+            // FASE 1: Perseguir. Recompensa per mantenir-se a prop dels altres jugadors
+            AddReward(0.001f); 
         }
         else
         {
-            // Penalty for not having bomb
-            AddReward(-0.01f);
+            // FASE 2: Fugir. Recompensa negativa per no tenir la bomba (l'incita a robar-la)
+            AddReward(-0.001f);
         }
-        
-        // If tagged someone, big reward
-        // Assuming GameState has some way to track tags, but for now, placeholder
     }
+
+    // --- MÈTODE HEURÍSTIC (Per controlar-lo tu amb el teclat i testejar) ---
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var continuousActionsOut = actionsOut.ContinuousActions;
         var discreteActionsOut = actionsOut.DiscreteActions;
         
-        // Use the old logic for heuristic
-        MakeDecision();
-        continuousActionsOut[0] = _horizontalInput;
-        discreteActionsOut[0] = _jumpInput ? 1 : 0;
-    }
-
-    private void MakeDecision()
-    {
-        if (GameState.CurrentBombOwner == null) return;
-
-        bool hasBomb = (GameState.CurrentBombOwner == gameObject);
-
-        if (hasBomb)
-        {
-            ChaseClosestTarget();
-        }
-        else
-        {
-            FleeFromBombOwner(GameState.CurrentBombOwner);
-        }
-    }
-
-    private void ChaseClosestTarget()
-    {
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        GameObject[] bots = GameObject.FindGameObjectsWithTag("Bot");
+        // Moviment horitzontal (A/D o fletxes)
+        continuousActionsOut[0] = Input.GetAxisRaw("Horizontal");
         
-        List<GameObject> allTargets = new List<GameObject>(players);
-        allTargets.AddRange(bots);
+        // Salt (Espai)
+        discreteActionsOut[0] = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-        GameObject closest = null;
-        float minDistance = float.MaxValue;
-
-        foreach (var t in allTargets)
-        {
-            if (t == gameObject) continue;
-            // Ignorar espectadors
-            if (GameState.Spectators.Contains(t.name)) continue;
-
-            float dist = Vector3.Distance(transform.position, t.transform.position);
-            if (dist < minDistance)
-            {
-                minDistance = dist;
-                closest = t;
-            }
-        }
-
-        if (closest != null)
-        {
-            _horizontalInput = (closest.transform.position.x > transform.position.x) ? 1f : -1f;
-            if (Mathf.Abs(closest.transform.position.y - transform.position.y) > 1.5f) _jumpInput = true;
-        }
+        // Escaleres (W/S o fletxes)
+        float v = Input.GetAxisRaw("Vertical");
+        if (v > 0) discreteActionsOut[1] = 1;      // Amunt
+        else if (v < 0) discreteActionsOut[1] = 2; // Avall
+        else discreteActionsOut[1] = 0;           // Quiet
     }
 
-    private void FleeFromBombOwner(GameObject owner)
+    // --- FUNCIONS DE SUPORT I INTEGRACIÓ ---
+
+    public void OnTaggedTarget()
     {
-        float dist = Vector3.Distance(transform.position, owner.transform.position);
-        
-        if (dist < 12.0f)
-        {
-            _horizontalInput = (owner.transform.position.x > transform.position.x) ? -1f : 1f;
-            if (Random.value < 0.05f) _jumpInput = true;
-        }
-        else
-        {
-            _horizontalInput = 0f;
-        }
+        AddReward(5.0f); // Recompensa màxima per l'èxit de la missió
+        EndEpisode();    // Acabem l'episodi per començar un de nou amb més coneixement
     }
 
     public void ApplySpeedMultiplier(float multiplier)
@@ -189,5 +180,11 @@ public class BotController : Agent
     public void ResetSpeedMultiplier()
     {
         if (Controller != null) Controller.ResetSpeedMultiplier();
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, ladderCheckRadius);
     }
 }

@@ -98,3 +98,26 @@ ServerData
 
 # Auto-generated scenes by play mode tests
 [Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# =======================================================
+# --- PYTHON & ML-AGENTS IGNORADOS ---
+# =======================================================
+
+# Tu entorno virtual (¡Muy importante!)
+burbuja_ml/
+
+# Archivos de caché y compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Resultados de entrenamiento (TensorBoard y Modelos)
+results/
+
+# Entornos virtuales por defecto (por si cambias el nombre en el futuro)
+venv/
+env/
+.env
+
+# Configuración local de Visual Studio Code
+.vscode/
