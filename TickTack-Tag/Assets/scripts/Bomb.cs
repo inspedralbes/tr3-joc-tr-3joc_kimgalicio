@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(Animator))]
 public class Bomb : MonoBehaviour
 {
     public GameStateSO GameState;
@@ -8,15 +9,23 @@ public class Bomb : MonoBehaviour
     public float SpeedMultiplier = 1.15f;
     public Vector3 Offset = new Vector3(0, 1.5f, 0);
 
+    [Header("Animation Settings")]
+    public float criticalTimeThreshold = 3.0f; // Tiempo para cambiar a clip "Critical"
+
     // Referència visual de la bomba sobre el cap
     public GameObject BombIndicatorPrefab;
     private Dictionary<GameObject, GameObject> _indicators = new Dictionary<GameObject, GameObject>();
     private float _lastTransferTime;
     private GameManager _gameManager;
+    
+    private Animator _animator;
+    private int _currentStage = 0; // 0: Idle, 1: Critical, 2: Explosion
 
     void Start()
     {
+        _animator = GetComponent<Animator>();
         _gameManager = FindFirstObjectByType<GameManager>();
+        
         if (GameState != null && GameState.CurrentBombOwner != null)
         {
             ApplyBombState(GameState.CurrentBombOwner);
@@ -32,12 +41,13 @@ public class Bomb : MonoBehaviour
             // Seguir al propietari
             transform.position = GameState.CurrentBombOwner.transform.position + Offset;
 
+            // --- Lógica de Animación ---
+            UpdateAnimationStage();
+
             // Feedback visual: escala segons el temps
-            // Creixem un 50% extra quan estem a punt d'explotar
             float t = 1f - (GameState.GameTimer / GameState.InitialTimer);
             float scale = 1f + (t * 0.5f); 
             
-            // Si queden menys de 3 segons, vibració/bateg ràpid
             if (GameState.GameTimer < 3f)
             {
                 scale += Mathf.Sin(Time.time * 25f) * 0.15f;
@@ -48,6 +58,26 @@ public class Bomb : MonoBehaviour
             {
                 Explode();
             }
+        }
+    }
+
+    private void UpdateAnimationStage()
+    {
+        int newStage = 0; // Idle por defecto
+
+        if (GameState.GameTimer <= 0)
+        {
+            newStage = 2; // Explosion
+        }
+        else if (GameState.GameTimer <= criticalTimeThreshold)
+        {
+            newStage = 1; // Critical
+        }
+
+        if (newStage != _currentStage)
+        {
+            _currentStage = newStage;
+            _animator.SetInteger("BombStage", _currentStage);
         }
     }
 
@@ -65,17 +95,13 @@ public class Bomb : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (GameState == null || GameState.GameOver) return;
-        
-        // Ignorar espectadors
         if (GameState.Spectators.Contains(other.gameObject.name)) return;
 
-        // Si l'entitat que ens toca NO és el propietari actual
-        if (other.CompareTag("Player") || other.CompareTag("Bot")) // Assumint tags
+        if (other.CompareTag("Player") || other.CompareTag("Bot"))
         {
             if (other.gameObject != GameState.CurrentBombOwner)
             {
                 if (Time.time - _lastTransferTime < TransferCooldown) return;
-
                 TransferTo(other.gameObject);
             }
         }
@@ -96,7 +122,6 @@ public class Bomb : MonoBehaviour
 
     private void ApplyBombState(GameObject owner)
     {
-        // 1. Activar indicador visual (bola sobre el cap)
         if (BombIndicatorPrefab != null)
         {
             GameObject indicator = Instantiate(BombIndicatorPrefab, owner.transform);
@@ -104,17 +129,12 @@ public class Bomb : MonoBehaviour
             _indicators[owner] = indicator;
         }
 
-        // 2. Aplicar outline vermell (si tenen SpriteRenderer)
         var sr = owner.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
-            // Per simplicitat, assumim que el shader té una propietat _OutlineColor o similar
-            // O simplement canviem el color del material si és un shader d'outline
             sr.material.SetColor("_OutlineColor", Color.red);
         }
 
-        // 3. Multiplicar velocitat
-        // Intentem trobar el controlador de moviment (Player o Bot)
         var playerCtrl = owner.GetComponent<PlayerModeController2D>();
         if (playerCtrl != null) playerCtrl.ApplySpeedMultiplier(SpeedMultiplier);
         
@@ -124,21 +144,18 @@ public class Bomb : MonoBehaviour
 
     private void RemoveBombState(GameObject owner)
     {
-        // 1. Destruir indicador
         if (_indicators.ContainsKey(owner))
         {
             Destroy(_indicators[owner]);
             _indicators.Remove(owner);
         }
 
-        // 2. Tornar outline a negre
         var sr = owner.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
             sr.material.SetColor("_OutlineColor", Color.black);
         }
 
-        // 3. Reset velocitat
         var playerCtrl = owner.GetComponent<PlayerModeController2D>();
         if (playerCtrl != null) playerCtrl.ResetSpeedMultiplier();
 

@@ -15,6 +15,7 @@ public class PlayerModeController2D : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float topDownSpeed = 4f;
     [SerializeField] private float platformerSpeed = 6f;
+    [SerializeField] private float climbSpeed = 5f; // Nueva: Velocidad en escaleras
     private float _currentSpeedMultiplier = 1f;
 
     [Header("Jump (Platformer only)")]
@@ -22,6 +23,7 @@ public class PlayerModeController2D : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.12f;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask ladderLayer; // Nueva: Selecciona la capa "Escaleras"
 
     [Header("Animator & Visuals")]
     [SerializeField] private Animator animator;
@@ -37,10 +39,13 @@ public class PlayerModeController2D : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 input;
     private bool jumpRequested;
+    private bool isNearLadder; // Nueva: Detecta si estamos tocando la escalera
+    private float defaultGravity; // Nueva: Para recordar la gravedad original
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        defaultGravity = (mode == GameMode.TopDown) ? 0f : 1f; // Guardamos la gravedad inicial
         ApplyModeSettings();
         if (GameState != null) GameState.InitializeEntity(gameObject.name);
     }
@@ -75,14 +80,19 @@ public class PlayerModeController2D : MonoBehaviour
     {
         string newState;
 
-        if (!IsGrounded())
+        // Si estamos trepando, podemos usar la animación de Walk o una específica si tuvieras
+        if (isNearLadder && Mathf.Abs(input.y) > 0.1f && mode == GameMode.Platformer)
+        {
+            newState = ANIM_WALK;
+        }
+        else if (!IsGrounded())
         {
             if (rb.linearVelocity.y > 0.1f)
                 newState = ANIM_JUMP;
             else if (rb.linearVelocity.y < -0.1f)
                 newState = ANIM_FALL;
             else
-                newState = _currentAnimState; // Mantener el anterior si estamos en el ápice
+                newState = _currentAnimState;
         }
         else
         {
@@ -94,7 +104,6 @@ public class PlayerModeController2D : MonoBehaviour
 
         ChangeAnimationState(newState);
 
-        // Girar el personaje
         if (spriteRenderer != null && input.x != 0)
         {
             spriteRenderer.flipX = input.x < 0;
@@ -104,7 +113,6 @@ public class PlayerModeController2D : MonoBehaviour
     private void ChangeAnimationState(string newState)
     {
         if (_currentAnimState == newState) return;
-
         animator.Play(newState);
         _currentAnimState = newState;
     }
@@ -114,8 +122,6 @@ public class PlayerModeController2D : MonoBehaviour
         if (animator != null)
         {
             ChangeAnimationState(ANIM_DAMAGE);
-            // Opcional: Podríamos volver a idle después de un tiempo si no hay más inputs, 
-            // pero el estado se actualizará en el próximo Update() basándose en el movimiento.
         }
     }
 
@@ -132,11 +138,30 @@ public class PlayerModeController2D : MonoBehaviour
         }
         else
         {
-            rb.linearVelocity = new Vector2(input.x * effectiveSpeed, rb.linearVelocity.y);
+            // --- LÓGICA DE ESCALERAS ---
+            if (isNearLadder && Mathf.Abs(input.y) > 0.1f)
+            {
+                // Trepar: Anulamos gravedad y aplicamos velocidad vertical
+                rb.gravityScale = 0f;
+                rb.linearVelocity = new Vector2(input.x * effectiveSpeed, input.y * climbSpeed);
+            }
+            else if (isNearLadder && !IsGrounded())
+            {
+                // Mantenerse en la escalera (sin caerse)
+                rb.gravityScale = 0f;
+                rb.linearVelocity = new Vector2(input.x * effectiveSpeed, 0f);
+            }
+            else
+            {
+                // Movimiento normal de plataformas
+                rb.gravityScale = defaultGravity;
+                rb.linearVelocity = new Vector2(input.x * effectiveSpeed, rb.linearVelocity.y);
+            }
+            // ---------------------------
 
             if (jumpRequested)
             {
-                if (IsGrounded())
+                if (IsGrounded() || isNearLadder) // Permitimos saltar también desde la escalera
                 {
                     rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
                     rb.AddForce(Vector2.up * jumpImpulse, ForceMode2D.Impulse);
@@ -145,6 +170,25 @@ public class PlayerModeController2D : MonoBehaviour
             }
         }
     }
+
+    // --- DETECCIÓN DE ESCALERAS POR TRIGGER ---
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (((1 << collision.gameObject.layer) & ladderLayer) != 0)
+        {
+            isNearLadder = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (((1 << collision.gameObject.layer) & ladderLayer) != 0)
+        {
+            isNearLadder = false;
+            rb.gravityScale = defaultGravity;
+        }
+    }
+    // ------------------------------------------
 
     public void ApplySpeedMultiplier(float multiplier)
     {
