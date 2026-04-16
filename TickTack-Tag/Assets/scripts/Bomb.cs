@@ -6,26 +6,29 @@ public class Bomb : MonoBehaviour
 {
     public GameStateSO GameState;
     public float TransferCooldown = 1.0f;
-    public float SpeedMultiplier = 1.15f;
+    
+    [Tooltip("Multiplicador de velocitat (ex: 1.2 = 20% més ràpid)")]
+    public float SpeedMultiplier = 1.2f;
+    
     public Vector3 Offset = new Vector3(0, 1.5f, 0);
 
     [Header("Animation Settings")]
-    public float criticalTimeThreshold = 3.0f; // Tiempo para cambiar a clip "Critical"
+    public float criticalTimeThreshold = 3.0f; 
 
-    // Referència visual de la bomba sobre el cap
     public GameObject BombIndicatorPrefab;
     private Dictionary<GameObject, GameObject> _indicators = new Dictionary<GameObject, GameObject>();
     private float _lastTransferTime;
     private GameManager _gameManager;
     
     private Animator _animator;
-    private int _currentStage = 0; // 0: Idle, 1: Critical, 2: Explosion
+    private int _currentStage = 0; 
 
     void Start()
     {
         _animator = GetComponent<Animator>();
         _gameManager = FindFirstObjectByType<GameManager>();
         
+        // Si ja hi ha un amo a l'inici, ens col·loquem a sobre
         if (GameState != null && GameState.CurrentBombOwner != null)
         {
             ApplyBombState(GameState.CurrentBombOwner);
@@ -38,13 +41,12 @@ public class Bomb : MonoBehaviour
 
         if (GameState.CurrentBombOwner != null)
         {
-            // Seguir al propietari
+            // La bomba segueix al propietari
             transform.position = GameState.CurrentBombOwner.transform.position + Offset;
 
-            // --- Lógica de Animación ---
             UpdateAnimationStage();
 
-            // Feedback visual: escala segons el temps
+            // Feedback visual d'escala
             float t = 1f - (GameState.GameTimer / GameState.InitialTimer);
             float scale = 1f + (t * 0.5f); 
             
@@ -63,16 +65,9 @@ public class Bomb : MonoBehaviour
 
     private void UpdateAnimationStage()
     {
-        int newStage = 0; // Idle por defecto
-
-        if (GameState.GameTimer <= 0)
-        {
-            newStage = 2; // Explosion
-        }
-        else if (GameState.GameTimer <= criticalTimeThreshold)
-        {
-            newStage = 1; // Critical
-        }
+        int newStage = 0; 
+        if (GameState.GameTimer <= 0) newStage = 2; 
+        else if (GameState.GameTimer <= criticalTimeThreshold) newStage = 1; 
 
         if (newStage != _currentStage)
         {
@@ -88,29 +83,20 @@ public class Bomb : MonoBehaviour
         GameObject loser = GameState.CurrentBombOwner;
         Debug.Log($"BOMBA EXPLOTA! {loser.name} perd una vida.");
         
-        // El GameManager s'encarregarà de la resta (restar vida, respawn, etc.)
         if (_gameManager != null) _gameManager.HandleDeath(loser);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (GameState == null || GameState.GameOver) return;
-        if (GameState.Spectators.Contains(other.gameObject.name)) return;
-
-        if (other.CompareTag("Player") || other.CompareTag("Bot"))
-        {
-            if (other.gameObject != GameState.CurrentBombOwner)
-            {
-                if (Time.time - _lastTransferTime < TransferCooldown) return;
-                TransferTo(other.gameObject);
-            }
-        }
-    }
-
+    // Aquest mètode es crida des de 'TagCollision.cs' en xocar els cossos
     public void TransferTo(GameObject newOwner)
     {
+        if (Time.time - _lastTransferTime < TransferCooldown) return;
+
         if (GameState.CurrentBombOwner != null)
         {
+            // Si l'antic amo era un Bot, li donem la recompensa de ML-Agents per haver passat la bomba
+            BotController botOwner = GameState.CurrentBombOwner.GetComponent<BotController>();
+            if (botOwner != null) botOwner.OnTaggedTarget();
+
             RemoveBombState(GameState.CurrentBombOwner);
         }
 
@@ -122,6 +108,7 @@ public class Bomb : MonoBehaviour
 
     private void ApplyBombState(GameObject owner)
     {
+        // 1. Efecte visual (Indicador sobre el cap)
         if (BombIndicatorPrefab != null)
         {
             GameObject indicator = Instantiate(BombIndicatorPrefab, owner.transform);
@@ -129,12 +116,11 @@ public class Bomb : MonoBehaviour
             _indicators[owner] = indicator;
         }
 
+        // 2. Canvi de color (Outline vermell)
         var sr = owner.GetComponent<SpriteRenderer>();
-        if (sr != null)
-        {
-            sr.material.SetColor("_OutlineColor", Color.red);
-        }
+        if (sr != null) sr.material.SetColor("_OutlineColor", Color.red);
 
+        // 3. AUGMENT DE VELOCITAT (Molt important per al gameplay)
         var playerCtrl = owner.GetComponent<PlayerModeController2D>();
         if (playerCtrl != null) playerCtrl.ApplySpeedMultiplier(SpeedMultiplier);
         
@@ -144,18 +130,18 @@ public class Bomb : MonoBehaviour
 
     private void RemoveBombState(GameObject owner)
     {
+        // 1. Treure indicador
         if (_indicators.ContainsKey(owner))
         {
             Destroy(_indicators[owner]);
             _indicators.Remove(owner);
         }
 
+        // 2. Restaurar color
         var sr = owner.GetComponent<SpriteRenderer>();
-        if (sr != null)
-        {
-            sr.material.SetColor("_OutlineColor", Color.black);
-        }
+        if (sr != null) sr.material.SetColor("_OutlineColor", Color.black);
 
+        // 3. RESTAURAR VELOCITAT NORMAL
         var playerCtrl = owner.GetComponent<PlayerModeController2D>();
         if (playerCtrl != null) playerCtrl.ResetSpeedMultiplier();
 

@@ -96,6 +96,8 @@ public class BotController : Agent
         }
 
         // 5. Distàncies i posicions relatives a tots els altres jugadors/bots vius
+        // NOTA: Para entrenamiento estable, el número de observaciones debe ser FIJO.
+        // Aquí buscamos los tags, pero lo ideal es que siempre observes al mismo número de oponentes.
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
         GameObject[] bots = GameObject.FindGameObjectsWithTag("Bot");
         
@@ -134,30 +136,31 @@ public class BotController : Agent
 
         if (GameState.CurrentBombOwner == gameObject)
         {
-            // FASE 1: Perseguir. Recompensa per mantenir-se a prop dels altres jugadors
+            // FASE 1: Perseguir. Recompensa por estar vivo con la bomba (incita a pasarla rápido)
+            // O una pequeña recompensa por acercarse a otros.
             AddReward(0.001f); 
         }
         else
         {
-            // FASE 2: Fugir. Recompensa negativa per no tenir la bomba (l'incita a robar-la)
-            AddReward(-0.001f);
+            // FASE 2: Fugir. Recompensa por sobrevivir sin la bomba.
+            AddReward(0.002f);
         }
     }
 
-    // --- MÈTODE HEURÍSTIC (Per controlar-lo tu amb el teclat i testejar) ---
+    // --- MÈTODE HEURÍSTIC (Control manual para testeo) ---
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var continuousActionsOut = actionsOut.ContinuousActions;
         var discreteActionsOut = actionsOut.DiscreteActions;
         
-        // Moviment horitzontal (A/D o fletxes)
+        // Moviment horitzontal
         continuousActionsOut[0] = Input.GetAxisRaw("Horizontal");
         
-        // Salt (Espai)
+        // Salt
         discreteActionsOut[0] = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-        // Escaleres (W/S o fletxes)
+        // Escaleres
         float v = Input.GetAxisRaw("Vertical");
         if (v > 0) discreteActionsOut[1] = 1;      // Amunt
         else if (v < 0) discreteActionsOut[1] = 2; // Avall
@@ -168,8 +171,9 @@ public class BotController : Agent
 
     public void OnTaggedTarget()
     {
-        AddReward(5.0f); // Recompensa màxima per l'èxit de la missió
-        EndEpisode();    // Acabem l'episodi per començar un de nou amb més coneixement
+        // Se llama desde Bomb.cs cuando este Bot le pasa la bomba a otro con éxito
+        AddReward(5.0f); 
+        EndEpisode();    
     }
 
     public void ApplySpeedMultiplier(float multiplier)

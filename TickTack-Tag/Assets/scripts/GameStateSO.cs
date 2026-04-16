@@ -9,16 +9,18 @@ public class GameStateSO : ScriptableObject
     public float InitialTimer = 90f;
     public int MaxLives = 3;
 
-    [Header("Estat de la Partida")]
-    [NonSerialized] public float GameTimer;
-    [NonSerialized] public GameObject CurrentBombOwner;
-    [NonSerialized] public bool GameOver;
-    [NonSerialized] public string WinnerName;
-    [NonSerialized] public string LoserName;
+    [Header("Estat de la Partida (Lectura en tiempo real)")]
+    // He quitado [NonSerialized] de las importantes para que puedas debuguear en el Inspector
+    public float GameTimer;
+    public GameObject CurrentBombOwner;
+    public bool GameOver;
     
-    // Diccionari per rastrejar les vides de cada entitat per nom o ID
+    [Header("Resultats")]
+    public string WinnerName;
+    public string LoserName;
+    
+    // Estos se quedan como NonSerialized porque los Diccionarios no se ven en el Inspector de forma nativa
     [NonSerialized] public Dictionary<string, int> EntityLives = new Dictionary<string, int>();
-    // Llista d'entitats que estan en mode espectador (vives però fora de la ronda actual)
     [NonSerialized] public HashSet<string> Spectators = new HashSet<string>();
 
     public event Action OnChanged;
@@ -58,20 +60,25 @@ public class GameStateSO : ScriptableObject
 
     public void InitializeEntity(string entityName)
     {
+        // Aseguramos que el diccionario esté listo
+        if (EntityLives == null) EntityLives = new Dictionary<string, int>();
+        
         if (!EntityLives.ContainsKey(entityName))
         {
             EntityLives[entityName] = MaxLives;
+            OnChanged?.Invoke();
         }
     }
 
     public int GetLives(string entityName)
     {
-        return EntityLives.ContainsKey(entityName) ? EntityLives[entityName] : 0;
+        if (EntityLives == null || !EntityLives.ContainsKey(entityName)) return 0;
+        return EntityLives[entityName];
     }
 
     public void SubtractLife(string entityName)
     {
-        if (EntityLives.ContainsKey(entityName))
+        if (EntityLives != null && EntityLives.ContainsKey(entityName))
         {
             EntityLives[entityName] = Mathf.Max(0, EntityLives[entityName] - 1);
             OnChanged?.Invoke();
