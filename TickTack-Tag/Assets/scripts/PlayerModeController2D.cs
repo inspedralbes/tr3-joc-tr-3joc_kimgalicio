@@ -45,7 +45,6 @@ public class PlayerModeController2D : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        // Guardamos la gravedad inicial según el modo
         defaultGravity = (mode == GameMode.TopDown) ? 0f : 1f; 
         ApplyModeSettings();
         
@@ -54,7 +53,6 @@ public class PlayerModeController2D : MonoBehaviour
 
     void Update()
     {
-        // Bloqueo de movimiento si el juego ha terminado o somos espectadores
         if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name)))
         {
             input = Vector2.zero;
@@ -63,7 +61,7 @@ public class PlayerModeController2D : MonoBehaviour
             return;
         }
 
-        // Si no es IA, leemos el teclado
+        // --- CAMBIO AQUÍ: Lectura de Teclado SOLO si NO es IA ---
         if (!useAiInput)
         {
             input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
@@ -73,6 +71,7 @@ public class PlayerModeController2D : MonoBehaviour
                 jumpRequested = true;
             }
         }
+        // Si es IA, NO hacemos nada en Update, esperamos a que el BotController llame a SetInput()
 
         if (animator != null)
         {
@@ -132,7 +131,6 @@ public class PlayerModeController2D : MonoBehaviour
     {
         if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name))) return;
 
-        // Calculamos la velocidad real usando el multiplicador que viene de la Bomba
         float effectiveSpeed = (mode == GameMode.TopDown ? topDownSpeed : platformerSpeed) * _currentSpeedMultiplier;
 
         if (mode == GameMode.TopDown)
@@ -142,11 +140,9 @@ public class PlayerModeController2D : MonoBehaviour
         }
         else
         {
-            // --- LÓGICA DE ESCALERAS ---
             if (isNearLadder && Mathf.Abs(input.y) > 0.1f)
             {
                 rb.gravityScale = 0f;
-                // Aplicamos también el multiplicador al trepar
                 rb.linearVelocity = new Vector2(input.x * effectiveSpeed, input.y * climbSpeed * _currentSpeedMultiplier);
             }
             else if (isNearLadder && !IsGrounded())
@@ -160,7 +156,6 @@ public class PlayerModeController2D : MonoBehaviour
                 rb.linearVelocity = new Vector2(input.x * effectiveSpeed, rb.linearVelocity.y);
             }
 
-            // --- LÓGICA DE SALTO ---
             if (jumpRequested)
             {
                 if (IsGrounded() || isNearLadder) 
@@ -203,7 +198,8 @@ public class PlayerModeController2D : MonoBehaviour
 
     public void SetInput(float horizontal, float vertical, bool jump)
     {
-        if (!useAiInput) return;
+        if (!useAiInput) return; // Si por error se llama y es el humano, lo ignoramos
+        
         input = new Vector2(horizontal, vertical);
         if (jump) jumpRequested = true;
     }

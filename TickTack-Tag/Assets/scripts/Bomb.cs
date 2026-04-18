@@ -89,7 +89,7 @@ public class Bomb : MonoBehaviour
     // Aquest mètode es crida des de 'TagCollision.cs' en xocar els cossos
     public void TransferTo(GameObject newOwner)
     {
-        if (Time.time - _lastTransferTime < TransferCooldown) return;
+        if (GameState.CurrentBombOwner != null && Time.time - _lastTransferTime < TransferCooldown) return;
 
         if (GameState.CurrentBombOwner != null)
         {
@@ -108,7 +108,15 @@ public class Bomb : MonoBehaviour
 
     private void ApplyBombState(GameObject owner)
     {
-        // 1. Efecte visual (Indicador sobre el cap)
+        // --- CÓDIGO NUEVO (Para limpiar indicadores viejos) ---
+        // 1. Limpiamos si ya tenía uno
+        if (_indicators.ContainsKey(owner))
+        {
+            Destroy(_indicators[owner]);
+            _indicators.Remove(owner);
+        }
+        
+        // 1.5. Efecte visual (Indicador sobre el cap)
         if (BombIndicatorPrefab != null)
         {
             GameObject indicator = Instantiate(BombIndicatorPrefab, owner.transform);

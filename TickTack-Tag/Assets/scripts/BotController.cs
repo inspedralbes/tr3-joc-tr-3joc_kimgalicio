@@ -10,6 +10,14 @@ public class BotController : Agent
     public GameStateSO GameState;
     public PlayerModeController2D Controller;
     public LayerMask ladderLayer;
+    
+    [Tooltip("Arrossega aquí el Transform del jugador (Dino verd)")]
+    public Transform OpponentTarget; 
+
+    // --- AÑADE ESTAS DOS LÍNEAS ---
+    [Header("Spawns d'Entrenament")]
+    public Transform Spawn1;
+    public Transform Spawn2;
 
     [Header("Ajustes de IA")]
     public float DecisionInterval = 0.1f;
@@ -21,22 +29,24 @@ public class BotController : Agent
     private bool _jumpInput;
     private bool _isNearLadder;
 
-    // --- INICIALIZACIÓ ---
+    // --- INICIALITZACIÓ ---
 
     public override void Initialize()
     {
-        // Si no está asignado en el inspector, lo busca en el mismo objeto
         if (Controller == null) Controller = GetComponent<PlayerModeController2D>();
-        
-        // Inicializamos la entidad en el GameState para tener vidas
-        if (GameState != null) GameState.InitializeEntity(gameObject.name);
+        if (GameState != null) 
+        {
+            // AÑADIMOS ESTA LÍNEA para quitar el "Game Over" perpetuo
+            GameState.ResetRun(); 
+            
+            GameState.InitializeEntity(gameObject.name);
+        }
     }
 
     void Update()
     {
         if (GameState == null || GameState.GameOver || Controller == null) return;
         
-        // Si sóc espectador (mort), no faig res i em quedo quiet
         if (GameState.Spectators.Contains(gameObject.name))
         {
             _horizontalInput = 0f;
@@ -46,80 +56,99 @@ public class BotController : Agent
             return;
         }
 
-        // Sol·licitar decisió al "Cerebro" de ML-Agents segons l'interval
         if (Time.time >= _nextDecisionTime)
         {
             RequestDecision();
             _nextDecisionTime = Time.time + DecisionInterval;
         }
 
-        // Enviem els inputs calculats per la IA al controlador físic
         Controller.SetInput(_horizontalInput, _verticalInput, _jumpInput);
-        
-        // Reset del salt per evitar que es quedi polsat en el següent frame físic
         _jumpInput = false;
     }
 
+    // Es crida automàticament cada cop que falla o encerta per reiniciar ràpid
     public override void OnEpisodeBegin()
     {
-        // Reset d'estat del bot al començar un nou episodi d'entrenament
+        // 1. Resetejar inputs
         _horizontalInput = 0f;
         _verticalInput = 0f;
         _jumpInput = false;
+
+        // 2. Colocar en los Spawns seguros
+        if (Spawn1 != null && Spawn2 != null)
+        {
+            // Tiramos una moneda (50% de probabilidad) para intercambiarlos de lado
+            // Así la IA no memoriza que siempre sale en el mismo sitio
+            if (Random.value > 0.5f)
+            {
+                transform.position = Spawn1.position;
+                if (OpponentTarget != null) OpponentTarget.position = Spawn2.position;
+            }
+            else
+            {
+                transform.position = Spawn2.position;
+                if (OpponentTarget != null) OpponentTarget.position = Spawn1.position;
+            }
+        }
+
+        // 3. FASE 1 ENTRENAMENT: Forçar que el Bot tingui la bomba inicialment
+        if (GameState != null)
+        {
+            // TRUCO: Le quitamos la bomba a todo el mundo antes de dársela al bot.
+            // Así la bomba no cree que se ha hecho un "pase" y no rompe el bucle.
+            GameState.SetBombOwner(null); 
+            
+            Bomb bomb = FindFirstObjectByType<Bomb>();
+            if (bomb != null)
+            {
+                bomb.TransferTo(this.gameObject);
+                // Restauramos el temporizador para que la bomba vuelva a su tamaño normal
+                GameState.GameTimer = GameState.InitialTimer; 
+            }
+        }
     }
 
-    // --- OBSERVACIONS (El que el Bot percep del món) ---
+    // --- OBSERVACIONS (El que veu el cervell de la IA) ---
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // 1. Posició pròpia (X, Y) - 2 observacions
+        // 1. Posició pròpia (X, Y) [Total: 2]
         sensor.AddObservation(transform.position.x);
         sensor.AddObservation(transform.position.y);
 
-        // 2. Estat de la bomba: Qui la té? - 1 observació
+        // 2. Estat de la bomba: La tinc jo? (1 = Sí, 0 = No) [Total: 1]
         bool hasBomb = (GameState.CurrentBombOwner == gameObject);
         sensor.AddObservation(hasBomb ? 1f : 0f);
 
-        // 3. Detecció d'escaleres: Estic a sobre d'una? - 1 observació
+        // 3. Detecció d'escaleres [Total: 1]
         _isNearLadder = Physics2D.OverlapCircle(transform.position, ladderCheckRadius, ladderLayer);
         sensor.AddObservation(_isNearLadder ? 1f : 0f);
 
-        // 4. Distància al propietari actual de la bomba - 1 observació
-        if (GameState.CurrentBombOwner != null)
+        // 4. Posició relativa del jugador respecte al Bot [Total: 2]
+        if (OpponentTarget != null)
         {
-            float distToBomb = Vector3.Distance(transform.position, GameState.CurrentBombOwner.transform.position);
-            sensor.AddObservation(distToBomb);
-        }
-        else
-        {
-            sensor.AddObservation(0f);
-        }
-
-        // 5. Distàncies i posicions relatives a tots els altres jugadors/bots vius
-        // NOTA: Para entrenamiento estable, el número de observaciones debe ser FIJO.
-        // Aquí buscamos los tags, pero lo ideal es que siempre observes al mismo número de oponentes.
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        GameObject[] bots = GameObject.FindGameObjectsWithTag("Bot");
-        
-        List<GameObject> allTargets = new List<GameObject>(players);
-        allTargets.AddRange(bots);
-        
-        foreach (var t in allTargets)
-        {
-            if (t == gameObject) continue;
-            if (GameState.Spectators.Contains(t.name)) continue;
-
-            // Enviem la posició relativa (direcció i distància) - 2 observacions per cada objectiu
-            Vector2 relativePos = (Vector2)t.transform.position - (Vector2)transform.position;
+            Vector2 relativePos = (Vector2)OpponentTarget.position - (Vector2)transform.position;
             sensor.AddObservation(relativePos.x);
             sensor.AddObservation(relativePos.y);
         }
+        else 
+        {
+            // Enviem 0 si no hi ha objectiu, l'important és no canviar la quantitat d'observacions
+            sensor.AddObservation(0f);
+            sensor.AddObservation(0f);
+        }
+        
+        // TOTAL D'OBSERVACIONS ENVIADES: 6
     }
 
-    // --- ACCIONS (El que el Bot decideix fer) ---
+    // --- ACCIONS (El que decideix fer la IA) ---
 
     public override void OnActionReceived(ActionBuffers actions)
     {
+        // DEBUG: Esto imprimirá en la consola de Unity lo que la IA está decidiendo.
+        // Si ves que los números cambian, ¡la IA está viva y conectada!
+        Debug.Log($"IA decidiendo movimiento horizontal: {actions.ContinuousActions[0]}");
+
         // Acció Contínua 0: Moviment horitzontal (-1 a 1)
         _horizontalInput = actions.ContinuousActions[0];
 
@@ -132,47 +161,41 @@ public class BotController : Agent
         else if (verticalAction == 2) _verticalInput = -1f;
         else _verticalInput = 0f;
 
-        // --- SISTEMA DE RECOMPENSES ---
-
+        // --- SISTEMA DE RECOMPENSES (FASE 1: PERSEGUIR) ---
         if (GameState.CurrentBombOwner == gameObject)
         {
-            // FASE 1: Perseguir. Recompensa por estar vivo con la bomba (incita a pasarla rápido)
-            // O una pequeña recompensa por acercarse a otros.
-            AddReward(0.001f); 
+            // Càstig lleuger constant. Obliga al bot a afanyar-se a passar la bomba!
+            AddReward(-0.001f); 
         }
         else
         {
-            // FASE 2: Fugir. Recompensa por sobrevivir sin la bomba.
-            AddReward(0.002f);
+            // Si no la té (significa que l'ha passat bé), petit premi per mantenir-se viu.
+            AddReward(0.001f);
         }
     }
-
-    // --- MÈTODE HEURÍSTIC (Control manual para testeo) ---
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var continuousActionsOut = actionsOut.ContinuousActions;
         var discreteActionsOut = actionsOut.DiscreteActions;
         
-        // Moviment horitzontal
         continuousActionsOut[0] = Input.GetAxisRaw("Horizontal");
-        
-        // Salt
         discreteActionsOut[0] = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
-        // Escaleres
         float v = Input.GetAxisRaw("Vertical");
-        if (v > 0) discreteActionsOut[1] = 1;      // Amunt
-        else if (v < 0) discreteActionsOut[1] = 2; // Avall
-        else discreteActionsOut[1] = 0;           // Quiet
+        if (v > 0) discreteActionsOut[1] = 1;      
+        else if (v < 0) discreteActionsOut[1] = 2; 
+        else discreteActionsOut[1] = 0;           
     }
 
-    // --- FUNCIONS DE SUPORT I INTEGRACIÓ ---
+    // --- ES CRIDA DES DE BOMB.CS QUAN XOCA AMB ÈXIT ---
 
     public void OnTaggedTarget()
     {
-        // Se llama desde Bomb.cs cuando este Bot le pasa la bomba a otro con éxito
+        // Gran premi final per aconseguir l'objectiu de la Fase 1!
         AddReward(5.0f); 
+        
+        // Reseteja el mapa a l'instant per a la següent ronda d'entrenament
         EndEpisode();    
     }
 

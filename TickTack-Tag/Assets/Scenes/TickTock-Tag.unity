@@ -2401,7 +2401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 7
+    VectorObservationSize: 6
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 1
@@ -2410,7 +2410,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: b74356010747c3c42bfc79aed4a0a016, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: BotCatcher
@@ -2493,12 +2493,15 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 2000
   GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
   Controller: {fileID: 1301766999}
   ladderLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
+  OpponentTarget: {fileID: 1581524237}
+  Spawn1: {fileID: 2022411158}
+  Spawn2: {fileID: 590795721}
   DecisionInterval: 0.2
   ladderCheckRadius: 0.3
 --- !u!114 &1301766999
@@ -2515,7 +2518,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
   mode: 1
-  useAiInput: 0
+  useAiInput: 1
   topDownSpeed: 4
   platformerSpeed: 6
   climbSpeed: 5
@@ -2542,7 +2545,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdd064101b3def94da5e234992c854cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameState: {fileID: 0}
+  GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
 --- !u!1 &1321095093
 GameObject:
   m_ObjectHideFlags: 0
@@ -2559,7 +2562,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1321095094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2681,7 +2684,7 @@ Transform:
   m_GameObject: {fileID: 1581524235}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.82, y: -2.8, z: 9.934526}
+  m_LocalPosition: {x: 1.81, y: 5.34, z: 9.934526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2824,7 +2827,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdd064101b3def94da5e234992c854cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameState: {fileID: 0}
+  GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
 --- !u!1 &1696867813
 GameObject:
   m_ObjectHideFlags: 0
@@ -3015,7 +3018,7 @@ Transform:
   m_GameObject: {fileID: 2022411157}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.8199997, y: -2.7999992, z: 9.934526}
+  m_LocalPosition: {x: 1.78, y: 4.87, z: 9.934526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
