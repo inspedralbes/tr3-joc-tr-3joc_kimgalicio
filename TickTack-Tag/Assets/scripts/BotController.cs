@@ -20,6 +20,8 @@ public class BotController : Agent
 
     [Header("Ajustes de IA")]
     public float DecisionInterval = 0.1f;
+    public LayerMask ladderLayer;           // <-- Vuelve a poner esto
+    public float ladderCheckRadius = 0.3f;  // <-- Vuelve a poner esto
 
     private float _nextDecisionTime;
     private float _horizontalInput;
@@ -119,7 +121,7 @@ public class BotController : Agent
         sensor.AddObservation(hasBomb ? 1f : 0f);
 
         // 3. Detecció d'escaleres [Total: 1]
-        _isNearLadder = Controller.isClimbing;
+        _isNearLadder = Physics2D.OverlapCircle(transform.position, ladderCheckRadius, ladderLayer);
         sensor.AddObservation(_isNearLadder ? 1f : 0f);
 
         // 4. Posició relativa del jugador respecte al Bot [Total: 2]
@@ -216,4 +218,9 @@ public class BotController : Agent
         if (Controller != null) Controller.ResetSpeedMultiplier();
     }
 
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, ladderCheckRadius);
+    }
 }
