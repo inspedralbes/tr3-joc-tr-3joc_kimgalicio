@@ -1,24 +1,18 @@
 # Pla d'Implementació
 
-## Fase 1: Core de Supervivència (GameStateSO)
-- Actualitzar `GameStateSO` per rastrejar les Vides (diccionari/array) de cada entitat. Màxim 3.
-- Ajustar `GameTimer` inicial a 90f.
-- Crear lògica per avaluar si alguna entitat ha arribat a 0 vides per disparar l'esdeveniment de "Game Over Total".
+## Fase 1-4: Core i Sistemes Base [COMPLET]
+- Implementació de `GameStateSO`, Bomb logic, Death Zone i `GameManager` amb suport per a 2-3 jugadors i sistema d'espectador.
+- Feedback visual (outlines) i buff de velocitat per al portador.
 
-## Fase 2: Feedback Visual i Buff de Moviment
-- **Controlador**: Modificar l'script de moviment perquè la `MoveSpeed` es multipliqui per un factor (ex. 1.15) si l'entitat és el `CurrentBombOwner`.
-- **Visuals**: Afegir suport per a Material Outlines (Vermell per al propietari, Negre per als altres) i activar/desactivar un GameObject fill (l'sprite de la bola sobre el cap) des de l'script `Bomb.cs` al moment de la transferència.
+## Fase 5: Entrenament ML Avançat (IA) [EN PROCÉS]
+- **Perseguir**: Entrenament base dels bots per buscar l'oponent quan tenen la bomba.
+- **Evadir**: Implementar i entrenar la lògica de fugida quan el bot no té la bomba.
+- **Navegació**: Millorar l'ús d'escaleres i el pathfinding dinàmic de l'agent ML.
 
-## Fase 3: Escenari i Death Zone
-- Crear un objecte "VoidCollider" sota l'arena amb `IsTrigger = true`.
-- Script `DeathZone.cs`: En col·lidir amb una entitat, invoca la lògica de mort d'aquesta entitat directament (igual que si la bomba hagués explotat en ella).
+## Fase 6: Poliment UI i UX [PENDENT]
+- Dissenyar i implementar la pantalla de "Game Over" amb els noms del guanyador i perdedor definitius.
+- Efectes de so i partícules per a l'explosió i el traspàs de la bomba.
+- Finalització del sistema de menús.
 
-## Fase 4: Gestor de Rondes i Multijugador (GameManager)
-- Refactoritzar el `GameManager` per gestionar estats: `Playing`, `RoundTransition`, i `GameOver`.
-- Implementar funció de `HandleDeath(Entity deadEntity)`:
-  - Restar vida.
-  - Si hi ha 2 jugadors totals: Iniciar corrutina (Pausa d'1s -> Respawn de tots -> Reset Timer).
-  - Si hi ha 3 jugadors totals i és la primera mort de la ronda: Desactivar físiques/visuals del mort (Espectador).
-  - Si hi ha 3 jugadors totals i és la segona mort: Iniciar corrutina de Fi de Ronda (Respawn dels 3 -> Reset Timer).
-- El `BotController` ha d'ometre en la seva cerca d'objectius qualsevol entitat que estigui en estat Espectador.
-- **UI Final**: Quan el joc detecta 0 vides, mostrar en pantalla TextMeshPro "Guanyador: [Nom]" i "Perdedor: [Nom]".
+---
+Per a una llista de tasques detallada, consulteu [context/05_BACKLOG.md](../../../context/05_BACKLOG.md).
