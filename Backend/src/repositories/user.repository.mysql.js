@@ -32,8 +32,14 @@ class UserRepositoryMySQL extends UserRepositoryInterface {
     // Si no s'ha trobat cap fila, retornem null (com marca la interfície).
     if (rows.length === 0) return null;
 
-    // Retornem el primer (i únic, per UNIQUE) resultat.
-    return rows[0];
+    // Retornem l'objecte amb l'estructura exacta requerida per evitar desajustos.
+    const row = rows[0];
+    return {
+      id:       row.id,
+      nickname: row.nickname,
+      wins:     row.wins,
+      losses:   row.losses,
+    };
   }
 
   /**
@@ -55,12 +61,12 @@ class UserRepositoryMySQL extends UserRepositoryInterface {
       [nickname, wins, losses]
     );
 
-    // Construïm i retornem l'objecte complet de l'usuari creat.
+    // Construïm i retornem l'objecte complet de l'usuari creat amb estructura explícita.
     return {
-      id: result.insertId,
-      nickname,
-      wins,
-      losses,
+      id:       result.insertId,
+      nickname: nickname,
+      wins:     wins,
+      losses:   losses,
     };
   }
 

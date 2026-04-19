@@ -71,7 +71,7 @@ public class NetworkManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 LoginResponse response = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
-                UserId = response.userId;
+                UserId = response.userId.ToString();
                 Debug.Log($"[NetworkManager] Login correcte. UserId: {UserId}");
                 callback?.Invoke(true);
             }
@@ -98,6 +98,7 @@ public class NetworkManager : MonoBehaviour
 
         using (UnityWebRequest request = new UnityWebRequest($"{httpUrl}/api/games/join", "POST"))
         {
+            Debug.Log($"[NetworkManager] Enviant Join JSON: {json}");
             byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
@@ -266,7 +267,7 @@ public class LoginRequest
 [Serializable]
 public class LoginResponse
 {
-    public string userId;
+    public int userId;
 }
 
 [Serializable]

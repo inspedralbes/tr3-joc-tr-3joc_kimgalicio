@@ -41,6 +41,7 @@ class UserController {
       const codiEstat = esNou ? 201 : 200;
 
       return res.status(codiEstat).json({
+        userId: usuari.id,
         missatge: esNou
           ? `Benvingut per primera vegada, ${usuari.nickname}!`
           : `Benvingut de nou, ${usuari.nickname}!`,

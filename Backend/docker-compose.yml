@@ -9,7 +9,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       # S'executa només la primera vegada per crear les taules
       - ../database.sql:/docker-entrypoint-initdb.d/setup.sql

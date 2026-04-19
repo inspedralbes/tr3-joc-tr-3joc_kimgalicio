@@ -60,12 +60,14 @@ public class MenuController : MonoBehaviour
     /// </summary>
     private void StartConnectionFlow(string mode)
     {
+        // Desactivem els botons per evitar clics duplicats
+        SetButtonsInteractable(false);
+
         // 3. Desa el Nickname introduït a l'input per fer-lo servir al Login
         string nickname = (_nicknameInput != null && !string.IsNullOrEmpty(_nicknameInput.value)) 
             ? _nicknameInput.value 
             : "JugadorDesconegut";
 
-        // 4. Posa un Debug.Log per saber en quina fase de la connexió estem
         Debug.Log($"[MenuController] FASE 1: Intentant Login amb nickname: {nickname}");
 
         // Pas 1: LoginUser
@@ -81,24 +83,33 @@ public class MenuController : MonoBehaviour
                     if (joinSuccess)
                     {
                         Debug.Log("[MenuController] FASE 3: Partida trobada. Connectant per WebSocket...");
-
-                        // Pas 3: ConnectToGame
                         NetworkManager.Instance.ConnectToGame();
 
-                        // Pas 4: LoadScene
                         Debug.Log("[MenuController] FASE 4: Connexió iniciada. Carregant escena de joc...");
                         SceneManager.LoadScene("TickTack-Tag");
+                        // Aquí no cal reactivar botons perquè canviem d'escena
                     }
                     else
                     {
                         Debug.LogError("[MenuController] ERROR: No s'ha pogut unir a la partida.");
+                        SetButtonsInteractable(true);
                     }
                 });
             }
             else
             {
                 Debug.LogError("[MenuController] ERROR: El Login ha fallat.");
+                SetButtonsInteractable(true);
             }
         });
+    }
+
+    /// <summary>
+    /// Activa o desactiva la interactivitat dels botons del menú.
+    /// </summary>
+    private void SetButtonsInteractable(bool state)
+    {
+        if (_btnVsBot != null) _btnVsBot.SetEnabled(state);
+        if (_btnVsPlayer != null) _btnVsPlayer.SetEnabled(state);
     }
 }
