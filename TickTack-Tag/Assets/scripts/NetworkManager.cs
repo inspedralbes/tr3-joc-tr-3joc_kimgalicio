@@ -6,10 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using NativeWebSocket;
 
-/// <summary>
-/// Gestiona la comunicació amb el backend (HTTP i WebSockets).
-/// Implementat com a Singleton que sobreviu entre escenes.
-/// </summary>
 public class NetworkManager : MonoBehaviour
 {
     public static NetworkManager Instance { get; private set; }
@@ -18,13 +14,11 @@ public class NetworkManager : MonoBehaviour
     [SerializeField] private string httpUrl = "http://localhost:3000";
     [SerializeField] private string wsUrl = "ws://localhost:3000";
 
-    // Dades de sessió
     public string UserId { get; private set; }
     public string GameId { get; private set; }
 
     private WebSocket _websocket;
 
-    // Esdeveniments per a altres scripts
     public static event Action<string, Vector2> OnMoveReceived;
     public static event Action<string> OnBombTransferReceived;
     public static event Action<int, string> OnExplosionReceived;
@@ -33,7 +27,7 @@ public class NetworkManager : MonoBehaviour
 
     private void Awake()
     {
-        // Patró Singleton
+
         if (Instance == null)
         {
             Instance = this;
@@ -47,9 +41,6 @@ public class NetworkManager : MonoBehaviour
 
     #region Part HTTP (UnityWebRequest)
 
-    /// <summary>
-    /// Fa el login de l'usuari amb un nickname.
-    /// </summary>
     public void LoginUser(string nickname, Action<bool> callback = null)
     {
         StartCoroutine(PostLogin(nickname, callback));
@@ -84,9 +75,6 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// S'uneix a una partida segons el mode ('vs_bot' o 'vs_player').
-    /// </summary>
     public void JoinGame(string mode, Action<bool> callback = null)
     {
         StartCoroutine(PostJoin(mode, callback));
@@ -122,9 +110,6 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Finalitza una partida i registra el guanyador.
-    /// </summary>
     public void FinishGame(int winnerId, int winnerHearts, Action<bool> callback = null)
     {
         StartCoroutine(PostFinish(winnerId, winnerHearts, callback));
@@ -132,8 +117,8 @@ public class NetworkManager : MonoBehaviour
 
     private IEnumerator PostFinish(int winnerId, int winnerHearts, Action<bool> callback)
     {
-        FinishRequest data = new FinishRequest { 
-            gameId = int.Parse(GameId), 
+        FinishRequest data = new FinishRequest {
+            gameId = int.Parse(GameId),
             winnerId = winnerId,
             winnerHearts = winnerHearts
         };
@@ -165,9 +150,6 @@ public class NetworkManager : MonoBehaviour
 
     #region Part WebSocket (NativeWebSocket)
 
-    /// <summary>
-    /// Connecta al servidor de WebSockets.
-    /// </summary>
     public async void ConnectToGame()
     {
         _websocket = new WebSocket(wsUrl);
@@ -195,13 +177,12 @@ public class NetworkManager : MonoBehaviour
             HandleWsMessage(message);
         };
 
-        // Iniciem la connexió
         await _websocket.Connect();
     }
 
     private void HandleWsMessage(string json)
     {
-        // Primer llegim l'acció per saber com parsejar la resta
+
         WsBaseMessage baseMsg = JsonUtility.FromJson<WsBaseMessage>(json);
 
         switch (baseMsg.action)

@@ -17,7 +17,6 @@
                 <ui:Button text="Vs Player" name="btn-vs-player" class="primary-button neon-pink" />
             </ui:VisualElement>
 
-            <!-- Spacer to push version label to bottom -->
             <ui:VisualElement style="flex-grow: 1;" />
             
             <ui:Label text="v.1.1.0" name="version-label" />

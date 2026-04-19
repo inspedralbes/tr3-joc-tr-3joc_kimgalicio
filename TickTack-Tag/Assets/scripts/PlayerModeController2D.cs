@@ -15,7 +15,7 @@ public class PlayerModeController2D : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float topDownSpeed = 4f;
     [SerializeField] private float platformerSpeed = 6f;
-    [SerializeField] private float climbSpeed = 5f; 
+    [SerializeField] private float climbSpeed = 5f;
     private float _currentSpeedMultiplier = 1f;
 
     [Header("Jump (Platformer only)")]
@@ -23,7 +23,7 @@ public class PlayerModeController2D : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.12f;
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private LayerMask ladderLayer; 
+    [SerializeField] private LayerMask ladderLayer;
 
     [Header("Animator & Visuals")]
     [SerializeField] private Animator animator;
@@ -39,15 +39,15 @@ public class PlayerModeController2D : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 input;
     private bool jumpRequested;
-    public bool isClimbing; 
-    private float defaultGravity; 
+    public bool isClimbing;
+    private float defaultGravity;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        defaultGravity = (mode == GameMode.TopDown) ? 0f : 1f; 
+        defaultGravity = (mode == GameMode.TopDown) ? 0f : 1f;
         ApplyModeSettings();
-        
+
         if (GameState != null) GameState.InitializeEntity(gameObject.name);
     }
 
@@ -61,7 +61,6 @@ public class PlayerModeController2D : MonoBehaviour
             return;
         }
 
-        // --- CAMBIO AQUÍ: Lectura de Teclado SOLO si NO es IA ---
         if (!useAiInput)
         {
             input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
@@ -71,7 +70,6 @@ public class PlayerModeController2D : MonoBehaviour
                 jumpRequested = true;
             }
         }
-        // Si es IA, NO hacemos nada en Update, esperamos a que el BotController llame a SetInput()
 
         if (animator != null)
         {
@@ -158,7 +156,7 @@ public class PlayerModeController2D : MonoBehaviour
 
             if (jumpRequested)
             {
-                if (IsGrounded() || isClimbing) 
+                if (IsGrounded() || isClimbing)
                 {
                     rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
                     rb.AddForce(Vector2.up * jumpImpulse, ForceMode2D.Impulse);
@@ -185,7 +183,6 @@ public class PlayerModeController2D : MonoBehaviour
         }
     }
 
-    // Métodos públicos para ser llamados por la Bomba o el Bot
     public void ApplySpeedMultiplier(float multiplier)
     {
         _currentSpeedMultiplier = multiplier;
@@ -198,8 +195,8 @@ public class PlayerModeController2D : MonoBehaviour
 
     public void SetInput(float horizontal, float vertical, bool jump)
     {
-        if (!useAiInput) return; // Si por error se llama y es el humano, lo ignoramos
-        
+        if (!useAiInput) return;
+
         input = new Vector2(horizontal, vertical);
         if (jump) jumpRequested = true;
     }

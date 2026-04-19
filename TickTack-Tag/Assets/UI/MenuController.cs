@@ -2,10 +2,6 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Controlador del Menú Principal utilitzant UI Toolkit (UIDocument).
-/// Gestiona el flux de login i unió a la partida.
-/// </summary>
 public class MenuController : MonoBehaviour
 {
     [SerializeField] private UIDocument _uiDocument;
@@ -25,12 +21,10 @@ public class MenuController : MonoBehaviour
 
         VisualElement root = _uiDocument.rootVisualElement;
 
-        // 1. Busca els botons i el TextField dins del UIDocument a l'inici
         _btnVsBot = root.Q<Button>("btn-vs-bot");
         _btnVsPlayer = root.Q<Button>("btn-vs-player");
         _nicknameInput = root.Q<TextField>("nickname-input");
 
-        // 2. Usa RegisterCallback<ClickEvent> per als botons
         if (_btnVsBot != null)
         {
             _btnVsBot.RegisterCallback<ClickEvent>(evt => StartConnectionFlow("vs_bot"));
@@ -55,29 +49,23 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Gestiona el flux de connexió: Login -> JoinGame -> ConnectToGame -> LoadScene.
-    /// </summary>
     private void StartConnectionFlow(string mode)
     {
-        // Desactivem els botons per evitar clics duplicats
+
         SetButtonsInteractable(false);
 
-        // 3. Desa el Nickname introduït a l'input per fer-lo servir al Login
-        string nickname = (_nicknameInput != null && !string.IsNullOrEmpty(_nicknameInput.value)) 
-            ? _nicknameInput.value 
+        string nickname = (_nicknameInput != null && !string.IsNullOrEmpty(_nicknameInput.value))
+            ? _nicknameInput.value
             : "JugadorDesconegut";
 
         Debug.Log($"[MenuController] FASE 1: Intentant Login amb nickname: {nickname}");
 
-        // Pas 1: LoginUser
         NetworkManager.Instance.LoginUser(nickname, (loginSuccess) =>
         {
             if (loginSuccess)
             {
                 Debug.Log($"[MenuController] FASE 2: Login correcte. Unint-se a partida mode: {mode}");
 
-                // Pas 2: JoinGame
                 NetworkManager.Instance.JoinGame(mode, (joinSuccess) =>
                 {
                     if (joinSuccess)
@@ -87,7 +75,7 @@ public class MenuController : MonoBehaviour
 
                         Debug.Log("[MenuController] FASE 4: Connexió iniciada. Carregant escena de joc...");
                         SceneManager.LoadScene("TickTack-Tag");
-                        // Aquí no cal reactivar botons perquè canviem d'escena
+
                     }
                     else
                     {
@@ -104,9 +92,6 @@ public class MenuController : MonoBehaviour
         });
     }
 
-    /// <summary>
-    /// Activa o desactiva la interactivitat dels botons del menú.
-    /// </summary>
     private void SetButtonsInteractable(bool state)
     {
         if (_btnVsBot != null) _btnVsBot.SetEnabled(state);

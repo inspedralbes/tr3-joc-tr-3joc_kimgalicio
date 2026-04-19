@@ -14,13 +14,13 @@ public class TimerDisplay : MonoBehaviour
 
     void OnEnable()
     {
-        // Ens suscribim a l'esdeveniment per actualitzar el text quan el GameState canviï
+
         if (GameState != null) GameState.OnChanged += RefreshUI;
     }
 
     void OnDisable()
     {
-        // Molt important desubscriure's per evitar errors de memòria
+
         if (GameState != null) GameState.OnChanged -= RefreshUI;
     }
 
@@ -28,7 +28,6 @@ public class TimerDisplay : MonoBehaviour
     {
         if (GameState == null || TimerText == null) return;
 
-        // ESTAT: FINAL DE JOC
         if (GameState.GameOver)
         {
             TimerText.color = VictoryColor;
@@ -37,10 +36,8 @@ public class TimerDisplay : MonoBehaviour
             return;
         }
 
-        // ESTAT: JUGANT (Mostrar temps actual amb 1 decimal)
         TimerText.text = GameState.GameTimer.ToString("F1") + "s";
 
-        // CANVI DE COLOR SEGONS EL TEMPS CRÍTIC
         if (GameState.GameTimer <= WarningThreshold)
         {
             TimerText.color = WarningColor;
@@ -56,11 +53,9 @@ public class TimerDisplay : MonoBehaviour
     {
         if (GameState == null || TimerText == null || GameState.GameOver) return;
 
-        // EFECTE DE BATEG (PULSE)
-        // El posem a l'Update perquè el moviment sigui suau (60fps) i no depengui només de l'OnChanged
         if (GameState.GameTimer <= WarningThreshold && GameState.GameTimer > 0)
         {
-            // Fem que el bateg sigui més ràpid com menys temps quedi
+
             float speedMultiplier = Mathf.InverseLerp(WarningThreshold, 0, GameState.GameTimer) * 5f + 2f;
             float pulse = 1f + Mathf.PingPong(Time.time * speedMultiplier, 0.15f);
             TimerText.transform.localScale = new Vector3(pulse, pulse, 1f);

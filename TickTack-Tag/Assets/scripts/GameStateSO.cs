@@ -10,16 +10,15 @@ public class GameStateSO : ScriptableObject
     public int MaxLives = 3;
 
     [Header("Estat de la Partida (Lectura en tiempo real)")]
-    // He quitado [NonSerialized] de las importantes para que puedas debuguear en el Inspector
+
     public float GameTimer;
     public GameObject CurrentBombOwner;
     public bool GameOver;
-    
+
     [Header("Resultats")]
     public string WinnerName;
     public string LoserName;
-    
-    // Estos se quedan como NonSerialized porque los Diccionarios no se ven en el Inspector de forma nativa
+
     [NonSerialized] public Dictionary<string, int> EntityLives = new Dictionary<string, int>();
     [NonSerialized] public HashSet<string> Spectators = new HashSet<string>();
 
@@ -60,9 +59,9 @@ public class GameStateSO : ScriptableObject
 
     public void InitializeEntity(string entityName)
     {
-        // Aseguramos que el diccionario esté listo
+
         if (EntityLives == null) EntityLives = new Dictionary<string, int>();
-        
+
         if (!EntityLives.ContainsKey(entityName))
         {
             EntityLives[entityName] = MaxLives;

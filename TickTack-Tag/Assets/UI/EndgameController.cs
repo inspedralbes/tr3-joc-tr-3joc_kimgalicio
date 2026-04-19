@@ -6,7 +6,7 @@ public class EndgameController : MonoBehaviour
 {
     [Header("UI Toolkit References")]
     [SerializeField] private UIDocument uiDocument;
-    
+
     private VisualElement _root;
     private Label _lblWinner;
     private Button _btnMenu;
@@ -34,24 +34,23 @@ public class EndgameController : MonoBehaviour
     private void Initialize()
     {
         if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
-        if (uiDocument == null) 
+        if (uiDocument == null)
         {
             Debug.LogWarning("[Endgame] UIDocument null!");
             return;
         }
 
         _root = uiDocument.rootVisualElement;
-        if (_root == null) 
+        if (_root == null)
         {
             Debug.LogWarning("[Endgame] rootVisualElement null!");
             return;
         }
 
-        // Busquem els elements. Si ja els teníem, no fem res.
         if (_endgamePanel == null) _endgamePanel = _root.Q<VisualElement>("endgame-panel");
         if (_lblWinner == null) _lblWinner = _root.Q<Label>("lbl-winner");
-        
-        if (_btnMenu == null) 
+
+        if (_btnMenu == null)
         {
             _btnMenu = _root.Q<Button>("btn-menu");
             if (_btnMenu != null) _btnMenu.clicked += OnMenuClicked;
@@ -63,8 +62,7 @@ public class EndgameController : MonoBehaviour
             if (_btnRestart != null) _btnRestart.clicked += OnRestartClicked;
         }
 
-        // Amaguem el panell per defecte (per si s'ha quedat encès a l'editor)
-        if (_endgamePanel != null) 
+        if (_endgamePanel != null)
             _endgamePanel.style.display = DisplayStyle.None;
     }
 
@@ -85,12 +83,11 @@ public class EndgameController : MonoBehaviour
         if (_isGameOverHandled) return;
         _isGameOverHandled = true;
 
-        // Ens assegurem que les referències estiguin a punt
         Initialize();
 
         Debug.Log($"[Endgame] Mostrant panell (Origen: {(winnerId == 0 ? "Local/Bot" : "Xarxa")}) Guanyador: {winnerId}");
-        
-        if (_endgamePanel == null) 
+
+        if (_endgamePanel == null)
         {
             Debug.LogError("[Endgame] No s'ha trobat l'element 'endgame-panel' al UXML!");
             return;
@@ -114,7 +111,7 @@ public class EndgameController : MonoBehaviour
 
         if (_btnRestart != null)
         {
-            // Restart només visible en vs_bot o si no hi ha GameId (local)
+
             bool isVsBotOrLocal = (winnerId == 0 || NetworkManager.Instance == null || string.IsNullOrEmpty(NetworkManager.Instance.GameId));
             _btnRestart.style.display = isVsBotOrLocal ? DisplayStyle.Flex : DisplayStyle.None;
         }

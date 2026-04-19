@@ -9,7 +9,7 @@ public class AutoChaser : MonoBehaviour
     {
         if (objetivoAmarillo != null)
         {
-            // Se mueve como un zombi hacia el amarillo
+
             transform.position = Vector2.MoveTowards(transform.position, objetivoAmarillo.position, velocidad * Time.deltaTime);
         }
     }
