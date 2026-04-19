@@ -49,14 +49,10 @@ class UserController {
       });
 
     } catch (error) {
-      // Errors de validació del servei (ex: nickname buit)
-      if (error.message.includes('nickname')) {
-        return res.status(400).json({ error: error.message });
-      }
-
-      // Error inesperat del servidor
-      console.error('[UserController] Error inesperat:', error);
-      return res.status(500).json({ error: 'Error intern del servidor.' });
+      // Error detallat per a diagnòstic al servidor
+      console.error('Error al Login:', error);
+      // Retornem el missatge real perquè Unity el pugui mostrar/diagnosticar
+      return res.status(500).json({ error: error.message });
     }
   }
 }

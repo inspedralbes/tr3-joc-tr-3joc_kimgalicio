@@ -29,6 +29,8 @@ class UserRepositoryMySQL extends UserRepositoryInterface {
       [nickname]
     );
 
+    console.log('Resultat del SELECT:', rows);
+
     // Si no s'ha trobat cap fila, retornem null (com marca la interfície).
     if (rows.length === 0) return null;
 
@@ -60,6 +62,8 @@ class UserRepositoryMySQL extends UserRepositoryInterface {
       'INSERT INTO Users (nickname, wins, losses) VALUES (?, ?, ?)',
       [nickname, wins, losses]
     );
+
+    console.log('Resultat del INSERT:', result);
 
     // Construïm i retornem l'objecte complet de l'usuari creat amb estructura explícita.
     return {
