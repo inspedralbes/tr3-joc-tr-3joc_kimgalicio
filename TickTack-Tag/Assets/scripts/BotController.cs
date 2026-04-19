@@ -28,11 +28,13 @@ public class BotController : Agent
     private float _verticalInput;
     private bool _jumpInput;
     private bool _isNearLadder;
+    private Rigidbody2D _rb;
 
     // --- INICIALITZACIÓ ---
 
     public override void Initialize()
     {
+        _rb = GetComponent<Rigidbody2D>();
         if (Controller == null) Controller = GetComponent<PlayerModeController2D>();
         if (GameState != null) 
         {
@@ -121,7 +123,9 @@ public class BotController : Agent
         sensor.AddObservation(hasBomb ? 1f : 0f);
 
         // 3. Detecció d'escaleres [Total: 1]
-        _isNearLadder = Physics2D.OverlapCircle(transform.position, ladderCheckRadius, ladderLayer);
+        // Añadimos un offset vertical para que el radar se centre en el torso/cabeza y no en los pies
+        Vector2 checkPosition = (Vector2)transform.position + (Vector2.up * 0.5f);
+        _isNearLadder = Physics2D.OverlapCircle(checkPosition, ladderCheckRadius, ladderLayer);
         sensor.AddObservation(_isNearLadder ? 1f : 0f);
 
         // 4. Posició relativa del jugador respecte al Bot [Total: 2]
@@ -144,10 +148,6 @@ public class BotController : Agent
     // --- ACCIONS (El que decideix fer la IA) ---
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // DEBUG: Esto imprimirá en la consola de Unity lo que la IA está decidiendo.
-        // Si ves que los números cambian, ¡la IA está viva y conectada!
-        Debug.Log($"IA decidiendo movimiento horizontal: {actions.ContinuousActions[0]}");
-
         // Acció Contínua 0: Moviment horitzontal (-1 a 1)
         _horizontalInput = actions.ContinuousActions[0];
 
@@ -172,13 +172,23 @@ public class BotController : Agent
             AddReward(0.001f);
         }
 
-        // --- NUEVO: MIGAS DE PAN (Aprender a usar escaleras) ---
-        if (OpponentTarget != null && OpponentTarget.position.y > transform.position.y + 1.0f)
+        // --- NUEVO: SISTEMA DE RECOMPENSAS DINÁMICAS (DIRECCIÓN + VELOCIDAD) ---
+        if (OpponentTarget != null && Controller != null && Controller.isClimbing)
         {
-            // Solo premiamos si está en la escalera Y pulsa la acción de subir (verticalAction == 1)
-            if (_isNearLadder && verticalAction == 1) 
+            float yDiff = OpponentTarget.position.y - transform.position.y;
+            float vSpeed = _rb != null ? _rb.linearVelocity.y : 0f;
+
+            // Premiamos si el bot se mueve en la dirección correcta respecto al objetivo
+            // Rebajamos el umbral de altura a 0.2f y el de velocidad a 0.01f para mantener el estímulo constante
+            if (yDiff > 0.2f && verticalAction == 1 && vSpeed > 0.01f)
             {
-                AddReward(0.005f); 
+                // Objetivo está arriba, el bot sube -> Recompensa proporcional a la velocidad
+                AddReward(0.01f * vSpeed); 
+            }
+            else if (yDiff < -0.2f && verticalAction == 2 && vSpeed < -0.01f)
+            {
+                // Objetivo está abajo, el bot baja -> Recompensa proporcional a la velocidad de descenso
+                AddReward(0.01f * Mathf.Abs(vSpeed)); 
             }
         }
     }
@@ -221,6 +231,7 @@ public class BotController : Agent
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, ladderCheckRadius);
+        Vector2 checkPos = (Vector2)transform.position + (Vector2.up * 0.5f);
+        Gizmos.DrawWireSphere(checkPos, ladderCheckRadius);
     }
 }
