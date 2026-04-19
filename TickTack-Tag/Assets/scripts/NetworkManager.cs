@@ -167,9 +167,8 @@ public class NetworkManager : MonoBehaviour
         {
             case "move":
                 WsMoveMessage moveMsg = JsonUtility.FromJson<WsMoveMessage>(json);
-                // Només avisem si el moviment NO és el nostre
                 if (moveMsg.userId != UserId) {
-                    OnMoveReceived?.Invoke(moveMsg.userId, ...);
+                    OnMoveReceived?.Invoke(moveMsg.userId, new Vector2(moveMsg.position.x, moveMsg.position.y));
                 }
                 break;
 
