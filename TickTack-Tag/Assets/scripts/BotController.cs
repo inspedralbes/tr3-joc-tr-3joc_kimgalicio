@@ -142,7 +142,6 @@ public class BotController : Agent
     }
 
     // --- ACCIONS (El que decideix fer la IA) ---
-
     public override void OnActionReceived(ActionBuffers actions)
     {
         // DEBUG: Esto imprimirá en la consola de Unity lo que la IA está decidiendo.
@@ -171,6 +170,21 @@ public class BotController : Agent
         {
             // Si no la té (significa que l'ha passat bé), petit premi per mantenir-se viu.
             AddReward(0.001f);
+        }
+
+        // --- NUEVO: MIGAS DE PAN (Aprender a usar escaleras) ---
+        if (OpponentTarget != null)
+        {
+            // Si el jugador está arriba (al menos 1 unidad más alto que el bot)
+            if (OpponentTarget.position.y > transform.position.y + 1.0f)
+            {
+                // Y el bot está tocando la escalera (esta variable ya la tienes calculada)
+                if (_isNearLadder) 
+                {
+                    // ¡Premio extra por acercarse a subir!
+                    AddReward(0.005f); 
+                }
+            }
         }
     }
 
