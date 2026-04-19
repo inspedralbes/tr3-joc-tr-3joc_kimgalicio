@@ -1,7 +1,7 @@
 // src/services/user.service.js
 // Capa de servei per a la lògica de negoci relacionada amb els usuaris.
 // Rep el repositori per injecció de dependències, de manera que no
-// coneix ni li importa com s'emmagatzemen les dades (memòria, MySQL, etc.).
+// coneix ni li importa com s'emmagatzemen les dades (memòria, MySQL, etc.)
 //
 // Flux principal (login/registre en un pas):
 //   1. Rep un nickname del controlador.
@@ -50,6 +50,27 @@ class UserService {
     });
 
     return { usuari: nouUsuari, esNou: true };
+  }
+
+  /**
+   * Suma +1 a les victòries o derrotes d'un usuari.
+   * Delegat al repositori. Cridat des de GameService en finalitzar partida.
+   *
+   * @param {number}  userId   - ID de l'usuari a actualitzar.
+   * @param {boolean} isWinner - true si ha guanyat, false si ha perdut.
+   * @returns {Promise<void>}
+   * @throws {Error} Si el repositori no implementa el mètode addResult.
+   */
+  async addResult(userId, isWinner) {
+    // Comprovem que el repositori injectat implementa el mètode addResult.
+    // La implementació InMemory no ho necessita, però la MySQL sí.
+    if (typeof this._userRepository.addResult !== 'function') {
+      throw new Error(
+        'El repositori d\'usuaris no implementa el mètode addResult(). ' +
+        'Assegura\'t d\'usar UserRepositoryMySQL.'
+      );
+    }
+    await this._userRepository.addResult(userId, isWinner);
   }
 }
 

@@ -1,7 +1,7 @@
 // src/services/game.service.js
 // Capa de servei per a la lògica de negoci de les partides.
 // Gestiona el matchmaking i la finalització de partides.
-// Rep el repositori per injecció de dependències.
+// Rep el repositori i el userService per injecció de dependències.
 //
 // Modes de joc:
 //   'vs_bot'    → La partida es crea i passa immediatament a 'playing'.
@@ -16,9 +16,14 @@ class GameService {
   /**
    * @param {import('../repositories/game.repository.interface')} gameRepository
    *   Instància que compleix el contracte de GameRepositoryInterface.
+   * @param {import('./user.service')} userService
+   *   Servei d'usuaris per actualitzar estadístiques (wins/losses) en finalitzar.
+   *   S'accepta null per mantenir retrocompatibilitat amb tests sense BD.
    */
-  constructor(gameRepository) {
+  constructor(gameRepository, userService = null) {
     this._gameRepository = gameRepository;
+    // El userService és opcional per no trencar la versió InMemory sense MySQL.
+    this._userService = userService;
   }
 
   /**
@@ -100,6 +105,24 @@ class GameService {
     if (!partidaFinalitzada) {
       throw new Error(`No s'ha trobat cap partida amb l'id ${gameId}.`);
     }
+
+    // ── Actualització d'estadístiques ────────────────────────────────────────
+    // Només si el userService ha estat injectat (mode MySQL).
+    // En mode InMemory (tests) es pot ometre sense errors.
+    if (this._userService) {
+      const { player1, player2 } = partidaFinalitzada;
+
+      // Sumem victòria al guanyador (isWinner = true).
+      await this._userService.addResult(winnerId, true);
+
+      // Sumem derrota al perdedor, que és el jugador que NO és el guanyador.
+      // En mode 'vs_bot', player2 és null: no cal sumar derrota a ningú.
+      const loserId = player1 === winnerId ? player2 : player1;
+      if (loserId !== null) {
+        await this._userService.addResult(loserId, false);
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────
 
     return partidaFinalitzada;
   }
