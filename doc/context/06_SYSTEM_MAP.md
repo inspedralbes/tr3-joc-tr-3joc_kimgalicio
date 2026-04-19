@@ -4,28 +4,36 @@
 
 ```mermaid
 graph TD
-    GM[GameManager] --> GSO[GameStateSO]
-    GM --> TD[TimerDisplay]
-    
-    PC[PlayerModeController2D] --> GSO
-    BC[BotController] --> PC
-    BC --> GSO
-    
-    B[Bomb] --> GSO
-    B --> TC[TagCollision]
-    
-    DZ[DeathZone] --> GM
-    
-    GSO -- "Esdeveniments" --> GM
-    GSO -- "Dades" --> TD
+    %% Client Unity
+    subgraph Unity_Client
+        NM[NetworkManager] --> GSO[GameStateSO]
+        GM[GameManager] --> GSO
+        GM --> TD[TimerDisplay]
+        PC[PlayerModeController2D] --> GSO
+        BC[BotController] --> PC
+        B[Bomb] --> GSO
+        UI[UI Toolkit Controllers] --> NM
+    end
+
+    %% Backend
+    subgraph Backend_Server
+        S[Server Node.js] --> WS[WebSocket Gateway]
+        WS --> UC[User Controller]
+        UC --> UR[User Repository]
+        UR --> DB[(MySQL DB)]
+    end
+
+    %% Connexions
+    NM <==> WS
+    NM -- HTTP --> UC
 ```
 
 ## Descripcions
 
-- **GameManager**: Autoritat central per a la lògica de les rondes (respawns, resta de vides).
-- **GameStateSO**: El magatzem central de dades. Notifica als altres sistemes els canvis (traspàs de bomba, temporitzador, Fi de Joc).
-- **Bomb**: Gestiona la lògica del temporitzador i l'esdeveniment d'explosió.
-- **TagCollision**: Lògica específica per passar la bomba entre col·lididors tipus "trigger".
-- **PlayerModeController2D**: Gestiona les físiques, el moviment i les animacions. Rep inputs del teclat o del `BotController`.
-- **BotController**: Capa de sensors/actuadors de ML-Agents.
-- **DeathZone**: Activa la lògica de mort quan les entitats cauen fora dels límits.
+- **NetworkManager**: Punt d'entrada per a tota la comunicació externa (HTTP/WS). Sincronitza l'estat remot amb el `GameStateSO`.
+- **GameStateSO**: El magatzem central de dades local. Notifica a la UI i als controladors els canvis d'estat.
+- **Backend Server**: Gestiona la lògica de partides multijugador, l'autenticació i la persistència.
+- **GameManager**: Autoritat per a la lògica de joc local i la coordinació dels agents.
+- **UI Toolkit Controllers**: Gestionen la interacció de l'usuari en els menús i pantalles de resultat, comunicant-se amb el `NetworkManager`.
+- **BotController**: IA que utilitza "Brain Swapping" per decidir si perseguir o fugir basant-se en l'estat de la bomba al `GameStateSO`.
+

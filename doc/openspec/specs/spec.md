@@ -1,34 +1,31 @@
-# Especificació: TickTack-Tag
+# Especificació: Tick-Tack Tag
 
-## 1. Entitats i Escenari
-- **Entitats**: De 2 a 3 (Jugadors i Bots). Totes comencen amb exactament 3 Vides.
-- **Escenari**: Plataformes flotants. La part inferior del nivell és una zona de buit (Death Zone).
+## 1. Entitats i Connexió
+- **Entitats**: De 2 a 3 jugadors. Poden ser humans (online) o bots (locals).
+- **Accés**: Els jugadors han de fer login amb un nickname. Si el nickname no existeix, es crea un nou usuari a la base de dades MySQL.
+- **Multijugador**: Connexió via WebSockets per sincronitzar moviments, transferències de bomba i esdeveniments de victòria.
 
 ## 2. Mecànica de la Bomba i Avantatges
-- A l'inici de cada ronda, una entitat rep la bomba automàticament.
+- **Assignació**: Una entitat rep la bomba a l'inici. En mode online, el servidor determina qui comença.
 - **Visuals**:
-  - L'entitat amb la bomba té un **contorn (outline) VERMELL** i un sprite/bola flotant sobre el seu cap.
-  - Les entitats sense la bomba tenen un **contorn NEGRE** i no tenen l'sprite sobre el cap.
-  - Això s'actualitza instantàniament en tocar una altra entitat.
-- **Buff de Velocitat**: El portador de la bomba és un poc més ràpid (ex. +15% de velocitat base) que els altres.
+  - Portador: Contorn VERMELL i indicador flotant.
+  - Altres: Contorn NEGRE.
+- **Buff de Velocitat**: El portador és un 15% més ràpid per permetre la persecució efectiva.
 
 ## 3. Bucle de Joc i Vides
-- **Temporitzador**: Cada ronda dura 1 minut i 30 segons (90s).
-- **Pèrdua de Vida (Es perd 1 vida si)**:
-  - El temporitzador arriba a 0 i la bomba explota (afecta només al portador).
-  - L'entitat cau al buit (afecta a qui caigui, tingui la bomba o no).
+- **Vides**: Cada entitat comença amb 3 vides (valor configurable via `GameStateSO`).
+- **Pèrdua de Vida**:
+  - Explosió: El temps arriba a 0 (90 segons per defecte).
+  - Mort per Buits: Caure a la Death Zone.
+- **Sincronització**: En partides online, la pèrdua de vida es comunica al servidor per actualitzar les estadístiques globals.
 
-## 4. Flux de Partida (2 vs 3 Jugadors)
-- **Partida de 2 Entitats**: 
-  - Si un mor (per bomba o caiguda), el joc es pausa un moment.
-  - Se li resta 1 vida al que ha mort.
-  - Ambdós fan respawn a les seves posicions inicials, el temps es reinicia a 90s, i comença una nova ronda.
-- **Partida de 3 Entitats (Sistema d'Espectador)**:
-  - Si un mor (per bomba o caiguda), se li resta 1 vida i passa a estat **Espectador** (invisible/intangible).
-  - Els 2 jugadors restants **continuen la ronda** sense que el joc es pausi.
-  - Quan un dels 2 restants mor, la ronda acaba.
-  - Després d'acabar la ronda, es reinicia la partida amb els 3 jugadors des de les seves posicions inicials (sempre que l'espectador no tingui 0 vides).
+## 4. Flux de Partida (Híbrid)
+- **Mode Local**: El `GameManager` gestiona els respawns i el reinici de la ronda ràpidament.
+- **Mode Online**:
+  - Els clients envien la seva posició i reben la dels altres.
+  - Les col·lisions pro-actives (Tag) s'envien al servidor, que valida i re-emet el canvi d'estat a tots els clients.
 
-## 5. Fi del Joc
-- El joc general acaba en l'instant en què **una de les entitats es queda a 0 vides**.
-- En ocórrer això, es pausa tot i apareix un text en pantalla indicant qui és el guanyador i qui ha perdut.
+## 5. Fi del Joc i Resultats
+- **Condició de Victòria**: L'última entitat amb vides és el guanyador.
+- **UI Toolkit**: S'utilitza una interfície dinàmica per mostrar el rànquing final i els botons per tornar al menú o reintentar.
+- **Persistència**: Les victòries i derrotes s'emmagatzemen a la base de dades MySQL a través de l'API del backend.

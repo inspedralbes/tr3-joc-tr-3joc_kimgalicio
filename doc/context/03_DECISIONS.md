@@ -11,6 +11,15 @@ Utilitzem `GameStateSO` com a nucli central de dades.
 S'ha eliminat qualsevol mecànica d'"atac" o de "monedes".
 - **Per què**: L'objectiu és centrar-se en la mecànica pura de la "Patata Calenta" i l'habilitat de plataformes.
 
-## Sistema d'Espectador
-Implementat específicament per a rondes de 3 jugadors.
-- **Per què**: Manté el flux del joc fins i tot després que un jugador sigui eliminat, evitant reinicis freqüents fins al duel final de la ronda.
+## Migració a MySQL i Docker
+Es va decidir migrar d'una persistència en memòria a una base de dades MySQL.
+- **Per què**: Permet mantenir estadístiques reals dels jugadors, gestionar l'autenticació de forma persistent i escalar el servidor mitjançant Docker.
+
+## UI Toolkit per sobre de uGUI
+S'ha adoptat **UI Toolkit** (UXML/USS) per al desenvolupament de la interfície de menús i pantalles final de partida.
+- **Per què**: Ofereix un flux de treball més similar al desenvolupament web, millor separació entre estil i lògica, i una gestió més eficient de layouts complexos.
+
+## Brain Swapping a la IA
+En lloc d'un únic model per a tot, s'utilitza una tècnica de "Brain Swapping".
+- **Per què**: Permet al bot ser extremadament bo en rols oposats (perseguir vs fugir) canviant el model neuronal en temps real basant-se en si té la bomba o no, evitant que un sol model hagi d'aprendre dos comportaments en conflicte.
+

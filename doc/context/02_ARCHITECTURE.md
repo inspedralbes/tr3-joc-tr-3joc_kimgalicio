@@ -1,24 +1,33 @@
 # 02_ARCHITECTURE
 
 ## Stack Tecnològic
-- **Motor**: Unity (2D).
-- **Llenguatge**: C#.
+- **Client (Unity)**: Motor Unity 2D, C#.
+- **Backend (Servidor)**: Node.js, Express.
+- **Base de Dades**: MySQL.
+- **Comunicació**: HTTP (Login/Join) + WebSockets (Gameplay en temps real).
 - **IA**: Unity ML-Agents per al comportament dels bots.
+- **UI**: Unity UI Toolkit (UXML/USS).
 
 ## Components Clau
 
 ### Gestió d'Estat (`GameStateSO`)
-- Utilitza un **ScriptableObject** com a font central de veritat per a les vides, el portador actual de la bomba, el temporitzador i l'estat d'espectador.
-- Desvincular la UI i la lògica del joc dels scripts individuals de les entitats.
+- Utilitza un **ScriptableObject** com a font central de veritat local.
+- Sincronitza dades amb el backend en partides multijugador.
+
+### Gestió de Xarxa (`NetworkManager`)
+- Orquestra la comunicació amb el backend.
+- Gestiona el cicle de vida de la connexió WebSocket i despatxa els esdeveniments de xarxa cap als sistemes de joc.
+
+### Backend (Arquitectura de Repositoris)
+- **Controladors**: Gestionen les peticions HTTP i la lògica de negocis.
+- **Repositoris (MySQL)**: Capa d'abstracció per a la persistència de dades (usuaris, games).
+- **WebSocket Gateway**: Sincronització d'estats de partida, moviments i transferències de bomba.
 
 ### Flux de Joc (`GameManager`)
-- Orquestra les transicions de ronda, els respawns i la gestió de vides.
-- Gestiona la lògica per canviar entre els estats de "Playing" (Jugant) i "GameOver" (Fi de partida).
+- Gestiona transicions, respawns i vides.
+- Adapta el comportament segons si el joc és local o online.
 
-### Lògica de la Bomba (`Bomb.cs` i `TagCollision.cs`)
-- Gestiona el traspàs de la bomba en col·lidir i actualitza el `GameStateSO`.
-- Administra el feedback visual (contorns/indicadors).
+### Control d'Entitats (`BotController` i `PlayerModeController2D`)
+- `PlayerModeController2D`: Controlador físic unificat.
+- `BotController`: Capa d'IA que usa "Brain Swapping" per canviar entre perseguir (Catcher) i fugir (Evader).
 
-### Control d'Entitats (`PlayerModeController2D` i `BotController`)
-- `PlayerModeController2D`: Controlador unificat tant per a jugadors humans com per a bots.
-- `BotController`: Hereta de `ML-Agents.Agent`, enviant inputs al controlador basant-se en observacions.

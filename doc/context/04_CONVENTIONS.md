@@ -1,20 +1,24 @@
 # 04_CONVENTIONS
 
 ## Estàndards de Codificació
-- **Nomenclatura**:
-  - Scripts/Classes: PascalCase (ex. `BotController.cs`).
-  - Camps/Mètodes Públics: PascalCase.
-  - Camps Privats/Interns: `_camelCase` amb prefix de guió baix.
-- **Patrons d'Unity**:
-  - Preferir `[SerializeField]` en lloc de camps públics sempre que sigui possible.
-  - Utilitzar `ScriptableObjects` per a l'estat compartit i els esdeveniments.
+
+### C# (Unity)
+- **Nomenclatura**: PascalCase per a Classes i Mètodes, `_camelCase` per a camps privats.
+- **Patrons**: `[SerializeField]` per a camps privats exposats. Ús de `GameStateSO` per a estats compartits.
+
+### JavaScript (Backend)
+- **Repositoris**: Seguir el patró Repository per a l'accés a dades.
+- **Async/Await**: Utilitzar promeses i async/await per a operacions de DB i xarxa.
+- **Enviroment**: Dades sensibles en fitxers `.env`.
 
 ## Estructura de Directoris
-- `Assets/Scripts`: Lògica principal i components.
-- `Assets/Scenes`: Escenes de joc i d'entrenament.
-- `context`: Context d'alt nivell per a la IA i documentació.
-- `doc/openspec/specs`: Especificacions tècniques.
+- `Assets/Scripts`: Lògica de joc C#.
+- `Assets/UI`: Fitxers UXML i USS per a la interfície.
+- `Backend/src`: Codi font del servidor (controllers, repositories, services).
+- `doc/context`: Documentació d'estat i arquitectura.
+- `doc/openspec/specs`: Especificacions funcionals.
 
 ## Instruccions per a la IA
-- La documentació s'ha d'actualitzar simultàniament amb els canvis de lògica.
-- Utilitzar `GameStateSO` com a interfície principal per a les modificacions de l'estat del joc.
+- Sincronitzar sempre els canvis de lògica amb la documentació a `doc/`.
+- Mantenir el `NetworkManager` com a punt central per a qualsevol nova funcionalitat multijugador.
+
