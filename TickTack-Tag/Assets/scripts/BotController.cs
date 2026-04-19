@@ -9,7 +9,6 @@ public class BotController : Agent
     [Header("Configuració de Referències")]
     public GameStateSO GameState;
     public PlayerModeController2D Controller;
-    public LayerMask ladderLayer;
     
     [Tooltip("Arrossega aquí el Transform del jugador (Dino verd)")]
     public Transform OpponentTarget; 
@@ -21,7 +20,6 @@ public class BotController : Agent
 
     [Header("Ajustes de IA")]
     public float DecisionInterval = 0.1f;
-    public float ladderCheckRadius = 0.3f;
 
     private float _nextDecisionTime;
     private float _horizontalInput;
@@ -121,7 +119,7 @@ public class BotController : Agent
         sensor.AddObservation(hasBomb ? 1f : 0f);
 
         // 3. Detecció d'escaleres [Total: 1]
-        _isNearLadder = Physics2D.OverlapCircle(transform.position, ladderCheckRadius, ladderLayer);
+        _isNearLadder = Controller.isClimbing;
         sensor.AddObservation(_isNearLadder ? 1f : 0f);
 
         // 4. Posició relativa del jugador respecte al Bot [Total: 2]
@@ -173,17 +171,12 @@ public class BotController : Agent
         }
 
         // --- NUEVO: MIGAS DE PAN (Aprender a usar escaleras) ---
-        if (OpponentTarget != null)
+        if (OpponentTarget != null && OpponentTarget.position.y > transform.position.y + 1.0f)
         {
-            // Si el jugador está arriba (al menos 1 unidad más alto que el bot)
-            if (OpponentTarget.position.y > transform.position.y + 1.0f)
+            // Solo premiamos si está en la escalera Y pulsa la acción de subir (verticalAction == 1)
+            if (_isNearLadder && verticalAction == 1) 
             {
-                // Y el bot está tocando la escalera (esta variable ya la tienes calculada)
-                if (_isNearLadder) 
-                {
-                    // ¡Premio extra por acercarse a subir!
-                    AddReward(0.005f); 
-                }
+                AddReward(0.005f); 
             }
         }
     }

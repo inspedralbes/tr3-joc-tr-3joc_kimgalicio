@@ -39,7 +39,7 @@ public class PlayerModeController2D : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 input;
     private bool jumpRequested;
-    private bool isNearLadder; 
+    public bool isClimbing; 
     private float defaultGravity; 
 
     private void Awake()
@@ -83,7 +83,7 @@ public class PlayerModeController2D : MonoBehaviour
     {
         string newState;
 
-        if (isNearLadder && Mathf.Abs(input.y) > 0.1f && mode == GameMode.Platformer)
+        if (isClimbing && Mathf.Abs(input.y) > 0.1f && mode == GameMode.Platformer)
         {
             newState = ANIM_WALK;
         }
@@ -140,12 +140,12 @@ public class PlayerModeController2D : MonoBehaviour
         }
         else
         {
-            if (isNearLadder && Mathf.Abs(input.y) > 0.1f)
+            if (isClimbing && Mathf.Abs(input.y) > 0.1f)
             {
                 rb.gravityScale = 0f;
                 rb.linearVelocity = new Vector2(input.x * effectiveSpeed, input.y * climbSpeed * _currentSpeedMultiplier);
             }
-            else if (isNearLadder && !IsGrounded())
+            else if (isClimbing && !IsGrounded())
             {
                 rb.gravityScale = 0f;
                 rb.linearVelocity = new Vector2(input.x * effectiveSpeed, 0f);
@@ -158,7 +158,7 @@ public class PlayerModeController2D : MonoBehaviour
 
             if (jumpRequested)
             {
-                if (IsGrounded() || isNearLadder) 
+                if (IsGrounded() || isClimbing) 
                 {
                     rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
                     rb.AddForce(Vector2.up * jumpImpulse, ForceMode2D.Impulse);
@@ -172,7 +172,7 @@ public class PlayerModeController2D : MonoBehaviour
     {
         if (((1 << collision.gameObject.layer) & ladderLayer) != 0)
         {
-            isNearLadder = true;
+            isClimbing = true;
         }
     }
 
@@ -180,7 +180,7 @@ public class PlayerModeController2D : MonoBehaviour
     {
         if (((1 << collision.gameObject.layer) & ladderLayer) != 0)
         {
-            isNearLadder = false;
+            isClimbing = false;
             rb.gravityScale = defaultGravity;
         }
     }
