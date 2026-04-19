@@ -1,9 +1,11 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
+    public static event Action<int, int> OnLocalGameOver;
     public GameStateSO GameState;
     public GameObject[] Entities; // Jugadors i Bots
     public Transform[] SpawnPoints;
@@ -128,34 +130,34 @@ public class GameManager : MonoBehaviour
 
         GameState.SetGameOver(winnerName, loserName);
 
-        // Notifiquem al Backend (només si estem en mode Xarxa/Multiplayer)
+        // Calculem les dades del guanyador per a l'esdeveniment (local i xarxa)
+        int winnerId = 0;
+        int winnerHearts = maxLives;
+
+        if (winnerEntity != null)
+        {
+            if (winnerEntity.name.ToLower().Contains("bot") || winnerEntity.CompareTag("Bot"))
+            {
+                winnerId = 0;
+            }
+            else
+            {
+                // Si no és un Bot, és un jugador. 
+                // Usem l'UserId si existeix, si no un ID per defecte (1) per a partides locals.
+                if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.UserId))
+                    winnerId = int.Parse(NetworkManager.Instance.UserId);
+                else
+                    winnerId = 1;
+            }
+        }
+
+        // Disparem l'esdeveniment local (Redundància per si la xarxa falla o som en local)
+        Debug.Log($"[GameManager] Disparant OnLocalGameOver. Guanyador: {winnerId}, Cors: {winnerHearts}");
+        OnLocalGameOver?.Invoke(winnerId, winnerHearts);
+
+        // Notifiquem al Backend (només si estem en mode Xarxa/Multiplayer amb GameId)
         if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
         {
-            int winnerId = 0;
-            int winnerHearts = maxLives;
-
-            // Determinar winnerId
-            if (winnerEntity != null)
-            {
-                // Si el guanyador és un Bot, l'ID és 0
-                if (winnerEntity.name.ToLower().Contains("bot") || winnerEntity.CompareTag("Bot"))
-                {
-                    winnerId = 0;
-                }
-                else
-                {
-                    // Si el guanyador és el jugador local o el rival
-                    // Nota: En mode vs_bot, si no és el Bot, és el jugador local.
-                    // En mode vs_player, caldria identificar l'ID del rival si ell guanya.
-                    // Per simplificar, si sóc jo qui guanya, uso el meu UserId.
-                    // Si guanya el rival, el seu ID s'enviarà quan el seu client detecti la mort.
-                    
-                    winnerId = int.Parse(NetworkManager.Instance.UserId);
-                }
-            }
-
-            // Només enviem si som el guanyador o si és vs_bot (perquè només hi ha un client)
-            // En vs_player, ambdós clients detectaran el final, però el backend gestiona la duplicitat.
             NetworkManager.Instance.FinishGame(winnerId, winnerHearts);
         }
     }
@@ -222,7 +224,7 @@ public class GameManager : MonoBehaviour
         {
             GameObject newOwner = (forceBotStart && botEntity != null) 
                 ? botEntity 
-                : candidates[Random.Range(0, candidates.Count)];
+                : candidates[UnityEngine.Random.Range(0, candidates.Count)];
 
             Bomb bomb = FindFirstObjectByType<Bomb>();
             if (bomb != null && newOwner != null)
