@@ -37,7 +37,7 @@ Aquesta carpeta centralitza tots els recursos tècnics, diagrames i especificaci
 3. Executa `npm install` i `npm start`.
 
 ### 🗄️ Base de Dades MySQL
-- Importa el fitxer `database.sql` situat a l'arrel per crear l'esquema necessari.
+- Importa el fitxer `database.sql` situat a `Backend/` per crear l'esquema necessari.
 - Configura les credencials al fitxer `.env` del backend.
 
 ---
