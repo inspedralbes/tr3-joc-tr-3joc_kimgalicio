@@ -24,7 +24,7 @@ const pool = mysql.createPool({
   // Contrasenya de l'usuari MySQL. Mai deixar-la buida en producció.
   password: process.env.DB_PASSWORD || '',
 
-  // Nom de la base de dades creada amb el script database.sql.
+  // Nom de la base de dades creada amb el script Backend/database.sql.
   database: process.env.DB_NAME     || 'ticktack_tag',
 
   // Nombre màxim de connexions simultànies al pool.

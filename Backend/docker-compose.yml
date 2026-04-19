@@ -12,7 +12,7 @@ services:
       - "3307:3306"
     volumes:
       # S'executa només la primera vegada per crear les taules
-      - ../database.sql:/docker-entrypoint-initdb.d/setup.sql
+      - ./database.sql:/docker-entrypoint-initdb.d/setup.sql
       - mysql_data:/var/lib/mysql
     networks:
       - ticktack-net
