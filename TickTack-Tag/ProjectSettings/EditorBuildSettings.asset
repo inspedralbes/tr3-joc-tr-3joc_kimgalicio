@@ -6,7 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/TickTock-Tag.unity
+    path: Assets/Scenes/Menu.unity
+    guid: de0869c6879fabe4f99b1f701448b166
+  - enabled: 1
+    path: Assets/Scenes/TickTack-Tag.unity
     guid: 78fd40f8ff5399e4d9c1b7b5e63a3afa
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

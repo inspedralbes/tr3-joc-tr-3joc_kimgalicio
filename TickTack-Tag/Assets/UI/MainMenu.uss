@@ -1,0 +1,126 @@
+/* Root container must fill the entire screen */
+#screen-container {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgb(20, 20, 40);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Glassmorphism box */
+#menu-box {
+    width: 480px;
+    padding: 60px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.15);
+    border-right-color: rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+    align-items: center;
+    flex-direction: column;
+}
+
+#title {
+    font-size: 56px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    margin-bottom: 50px;
+    -unity-text-align: middle-center;
+    letter-spacing: 3px;
+}
+
+#input-container {
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.input-label {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 12px;
+    font-size: 18px;
+    -unity-font-style: bold;
+}
+
+#nickname-input {
+    height: 55px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    padding-left: 20px;
+    color: white;
+    font-size: 20px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgba(255, 255, 255, 0.1);
+    border-right-color: rgba(255, 255, 255, 0.1);
+    border-top-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+#nickname-input:focus {
+    border-left-color: rgb(0, 255, 255);
+    border-right-color: rgb(0, 255, 255);
+    border-top-color: rgb(0, 255, 255);
+    border-bottom-color: rgb(0, 255, 255);
+}
+
+#button-container {
+    width: 100%;
+}
+
+.primary-button {
+    height: 65px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: white;
+    margin-bottom: 20px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    transition-duration: 0.15s;
+}
+
+.neon-blue {
+    background-color: rgb(0, 110, 230);
+}
+
+.neon-blue:hover {
+    background-color: rgb(0, 150, 255);
+    scale: 1.04;
+}
+
+.neon-pink {
+    background-color: rgb(210, 0, 120);
+}
+
+.neon-pink:hover {
+    background-color: rgb(255, 0, 170);
+    scale: 1.04;
+}
+
+#version-label {
+    margin-top: 25px;
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 14px;
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    
+    <Style src="project:/Assets/UI/MainMenu.uss" />
+
+    <ui:VisualElement name="screen-container">
+        <ui:VisualElement name="menu-box">
+            <ui:Label text="TICK TACK TAG" name="title" />
+            
+            <ui:VisualElement name="input-container">
+                <ui:Label text="Nom del Jugador:" class="input-label" />
+                <ui:TextField name="nickname-input" placeholder-text="Ex: DinoPro" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="button-container">
+                <ui:Button text="Vs Bot" name="btn-vs-bot" class="primary-button neon-blue" />
+                <ui:Button text="Vs Player" name="btn-vs-player" class="primary-button neon-pink" />
+            </ui:VisualElement>
+
+            <!-- Spacer to push version label to bottom -->
+            <ui:VisualElement style="flex-grow: 1;" />
+            
+            <ui:Label text="v.1.1.0" name="version-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
