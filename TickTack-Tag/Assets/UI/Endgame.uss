@@ -9,7 +9,6 @@
     background-color: rgba(10, 10, 25, 0.85); /* Darker semi-transparent overlay */
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(10px); /* Modern blur effect */
 }
 
 /* Glassmorphism results box */
