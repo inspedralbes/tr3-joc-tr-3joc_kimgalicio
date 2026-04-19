@@ -216,9 +216,4 @@ public class BotController : Agent
         if (Controller != null) Controller.ResetSpeedMultiplier();
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, ladderCheckRadius);
-    }
 }
