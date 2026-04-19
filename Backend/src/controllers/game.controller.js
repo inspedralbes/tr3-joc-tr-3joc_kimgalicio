@@ -10,6 +10,15 @@ class GameController {
    */
   constructor(gameService) {
     this._gameService = gameService;
+    this._broadcastGameOver = null;
+  }
+
+  /**
+   * Injecta la funció de broadcast de WebSockets des de server.js.
+   * @param {Function} broadcastFn
+   */
+  setBroadcastGameOver(broadcastFn) {
+    this._broadcastGameOver = broadcastFn;
   }
 
   /**
@@ -75,16 +84,27 @@ class GameController {
    */
   async finish(req, res) {
     try {
-      const { gameId, winnerId } = req.body;
+      const { gameId, winnerId, winnerHearts } = req.body;
 
       // Validació dels camps requerits
-      if (!gameId || !winnerId) {
+      if (!gameId || winnerId === undefined) {
         return res.status(400).json({
           error: 'Els camps "gameId" i "winnerId" són obligatoris al cos de la petició.',
         });
       }
 
       const partida = await this._gameService.finishGame(gameId, winnerId);
+
+      // Si tenim el broadcast configurat, avisem per WebSocket
+      if (this._broadcastGameOver) {
+        const loserId = (partida.player1 === winnerId) ? partida.player2 : partida.player1;
+        
+        this._broadcastGameOver(String(gameId), {
+          winnerId,
+          winnerHearts: winnerHearts || 0,
+          loserId: loserId || 0 // 0 per al bot si escau
+        });
+      }
 
       return res.status(200).json({
         missatge: `Partida ${partida.id} finalitzada. Guanyador: usuari ${partida.winnerId}.`,

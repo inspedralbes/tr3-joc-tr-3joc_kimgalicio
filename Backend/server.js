@@ -91,6 +91,9 @@ const servidorHttp = app.listen(PORT, () => {
 
 // --- Inicialització del servidor WebSocket ---
 // S'adjunta al servidor HTTP existent: comparteix port i procés.
-inicialitzarWebSocket(servidorHttp);
+const { broadcastGameOver } = inicialitzarWebSocket(servidorHttp);
+
+// Injectem la capacitat de broadcast al controlador per quan s'acabin partides via HTTP
+gameController.setBroadcastGameOver(broadcastGameOver);
 
 module.exports = app; // Exportem per a possibles tests

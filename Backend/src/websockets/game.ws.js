@@ -228,7 +228,24 @@ function inicialitzarWebSocket(servidorHttp) {
   });
 
   console.log('[WS] Servidor WebSocket inicialitzat i adjunt al port HTTP.');
-  return wss;
+
+  /**
+   * Envia un missatge de final de partida a tots els jugadors d'una partida.
+   * @param {string} gameId
+   * @param {Object} dades { winnerId, winnerHearts, loserId }
+   */
+  function broadcastGameOver(gameId, dades) {
+    const jugadors = partides.get(gameId);
+    if (!jugadors) return;
+
+    console.log(`[WS] Enviant game_over per a la partida ${gameId}:`, dades);
+    jugadors.forEach((socket) => {
+      enviar(socket, { action: 'game_over', ...dades });
+    });
+  }
+
+  // Retornem la funció per poder-la usar des de fora (controllers)
+  return { wss, broadcastGameOver };
 }
 
 module.exports = inicialitzarWebSocket;

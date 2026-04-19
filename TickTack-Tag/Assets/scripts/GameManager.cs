@@ -113,6 +113,8 @@ public class GameManager : MonoBehaviour
         _isTransitioning = true;
         string winnerName = "Ningú";
         int maxLives = -1;
+        GameObject winnerEntity = null;
+
         foreach (var entity in Entities)
         {
             int lives = GameState.GetLives(entity.name);
@@ -120,10 +122,42 @@ public class GameManager : MonoBehaviour
             {
                 maxLives = lives;
                 winnerName = entity.name;
+                winnerEntity = entity;
             }
         }
 
         GameState.SetGameOver(winnerName, loserName);
+
+        // Notifiquem al Backend (només si estem en mode Xarxa/Multiplayer)
+        if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
+        {
+            int winnerId = 0;
+            int winnerHearts = maxLives;
+
+            // Determinar winnerId
+            if (winnerEntity != null)
+            {
+                // Si el guanyador és un Bot, l'ID és 0
+                if (winnerEntity.name.ToLower().Contains("bot") || winnerEntity.CompareTag("Bot"))
+                {
+                    winnerId = 0;
+                }
+                else
+                {
+                    // Si el guanyador és el jugador local o el rival
+                    // Nota: En mode vs_bot, si no és el Bot, és el jugador local.
+                    // En mode vs_player, caldria identificar l'ID del rival si ell guanya.
+                    // Per simplificar, si sóc jo qui guanya, uso el meu UserId.
+                    // Si guanya el rival, el seu ID s'enviarà quan el seu client detecti la mort.
+                    
+                    winnerId = int.Parse(NetworkManager.Instance.UserId);
+                }
+            }
+
+            // Només enviem si som el guanyador o si és vs_bot (perquè només hi ha un client)
+            // En vs_player, ambdós clients detectaran el final, però el backend gestiona la duplicitat.
+            NetworkManager.Instance.FinishGame(winnerId, winnerHearts);
+        }
     }
 
     private IEnumerator RoundResetCoroutine()

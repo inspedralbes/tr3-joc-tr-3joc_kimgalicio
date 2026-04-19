@@ -28,6 +28,7 @@ public class NetworkManager : MonoBehaviour
     public static event Action<string, Vector2> OnMoveReceived;
     public static event Action<string> OnBombTransferReceived;
     public static event Action<int, string> OnExplosionReceived;
+    public static event Action<WsGameOverMessage> OnGameOverReceived;
     public static event Action OnConnected;
 
     private void Awake()
@@ -121,6 +122,45 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Finalitza una partida i registra el guanyador.
+    /// </summary>
+    public void FinishGame(int winnerId, int winnerHearts, Action<bool> callback = null)
+    {
+        StartCoroutine(PostFinish(winnerId, winnerHearts, callback));
+    }
+
+    private IEnumerator PostFinish(int winnerId, int winnerHearts, Action<bool> callback)
+    {
+        FinishRequest data = new FinishRequest { 
+            gameId = int.Parse(GameId), 
+            winnerId = winnerId,
+            winnerHearts = winnerHearts
+        };
+        string json = JsonUtility.ToJson(data);
+
+        using (UnityWebRequest request = new UnityWebRequest($"{httpUrl}/api/games/finish", "POST"))
+        {
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("[NetworkManager] Partida finalitzada correctament al backend.");
+                callback?.Invoke(true);
+            }
+            else
+            {
+                Debug.LogError($"[NetworkManager] Error en finalitzar partida: {request.error}");
+                callback?.Invoke(false);
+            }
+        }
+    }
+
     #endregion
 
     #region Part WebSocket (NativeWebSocket)
@@ -181,6 +221,11 @@ public class NetworkManager : MonoBehaviour
             case "explosion":
                 WsExplosionMessage explosionMsg = JsonUtility.FromJson<WsExplosionMessage>(json);
                 OnExplosionReceived?.Invoke(explosionMsg.livesLeft, explosionMsg.loserId);
+                break;
+
+            case "game_over":
+                WsGameOverMessage gameOverMsg = JsonUtility.FromJson<WsGameOverMessage>(json);
+                OnGameOverReceived?.Invoke(gameOverMsg);
                 break;
 
             default:
@@ -314,6 +359,22 @@ public class WsExplosionMessage : WsBaseMessage
 {
     public int livesLeft;
     public string loserId;
+}
+
+[Serializable]
+public class WsGameOverMessage : WsBaseMessage
+{
+    public int winnerId;
+    public int winnerHearts;
+    public int loserId;
+}
+
+[Serializable]
+public class FinishRequest
+{
+    public int gameId;
+    public int winnerId;
+    public int winnerHearts;
 }
 
 [Serializable]
