@@ -21,7 +21,8 @@ public class Bomb : MonoBehaviour
     private GameManager _gameManager;
     
     private Animator _animator;
-    private int _currentStage = 0; 
+    private int _currentStage = 0;
+    private bool _hasExploded = false; // Pestillo anti-spam d'explosió
 
     void Start()
     {
@@ -56,8 +57,9 @@ public class Bomb : MonoBehaviour
             }
             transform.localScale = new Vector3(scale, scale, 1f);
             
-            if (GameState.GameTimer <= 0)
+            if (GameState.GameTimer <= 0 && !_hasExploded)
             {
+                _hasExploded = true; // Tanquem el pestillo: només explota UNA vegada
                 Explode();
             }
         }
@@ -99,6 +101,7 @@ public class Bomb : MonoBehaviour
         GameState.SetBombOwner(newOwner);
         ApplyBombState(newOwner);
         _lastTransferTime = Time.time;
+        _hasExploded = false; // Resetem el pestillo perquè pugui tornar a explotar
         Debug.Log($"Bomba transferida a {newOwner.name}");
     }
 

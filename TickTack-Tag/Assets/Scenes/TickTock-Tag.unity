@@ -2413,7 +2413,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: BotEvader
+  m_BehaviorName: BotCatcher
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -2493,7 +2493,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 2000
+  MaxStep: 0
   GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
   Controller: {fileID: 1301766999}
   OpponentTarget: {fileID: 1581524237}

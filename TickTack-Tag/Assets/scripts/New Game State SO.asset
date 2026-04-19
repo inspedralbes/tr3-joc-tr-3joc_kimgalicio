@@ -12,4 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aec27afb308259b4089f89dc5a694094, type: 3}
   m_Name: New Game State SO
   m_EditorClassIdentifier: 
-  MaxLives: 5
+  InitialTimer: 30
+  MaxLives: 3
+  GameTimer: 89.68048
+  CurrentBombOwner: {fileID: 0}
+  GameOver: 0
+  WinnerName: 
+  LoserName: 

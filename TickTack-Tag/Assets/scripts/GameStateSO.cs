@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class GameStateSO : ScriptableObject
 {
     [Header("Configuració")]
-    public float InitialTimer = 90f;
+    public float InitialTimer = 30f;
     public int MaxLives = 3;
 
     [Header("Estat de la Partida (Lectura en tiempo real)")]
