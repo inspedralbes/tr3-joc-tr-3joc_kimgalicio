@@ -93,10 +93,6 @@ public class Bomb : MonoBehaviour
 
         if (GameState.CurrentBombOwner != null)
         {
-            // Si l'antic amo era un Bot, li donem la recompensa de ML-Agents per haver passat la bomba
-            BotController botOwner = GameState.CurrentBombOwner.GetComponent<BotController>();
-            if (botOwner != null) botOwner.OnTaggedTarget();
-
             RemoveBombState(GameState.CurrentBombOwner);
         }
 

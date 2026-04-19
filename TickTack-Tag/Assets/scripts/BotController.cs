@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
+using Unity.InferenceEngine;
+using Unity.MLAgents.Policies;
 
 public class BotController : Agent
 {
@@ -13,15 +15,18 @@ public class BotController : Agent
     [Tooltip("Arrossega aquí el Transform del jugador (Dino verd)")]
     public Transform OpponentTarget; 
 
-    // --- AÑADE ESTAS DOS LÍNEAS ---
-    [Header("Spawns d'Entrenament")]
-    public Transform Spawn1;
-    public Transform Spawn2;
+
 
     [Header("Ajustes de IA")]
     public float DecisionInterval = 0.1f;
     public LayerMask ladderLayer;           // <-- Vuelve a poner esto
     public float ladderCheckRadius = 0.3f;  // <-- Vuelve a poner esto
+
+    [Header("Modelos IA (.onnx)")]
+    public ModelAsset catcherModel;
+    public ModelAsset evaderModel;
+    private BehaviorParameters _behaviorParameters;
+    private bool? _wasCatcher = null; // Control para no cambiar el modelo cada frame
 
     private float _nextDecisionTime;
     private float _horizontalInput;
@@ -34,6 +39,7 @@ public class BotController : Agent
 
     public override void Initialize()
     {
+        _behaviorParameters = GetComponent<BehaviorParameters>();
         _rb = GetComponent<Rigidbody2D>();
         if (Controller == null) Controller = GetComponent<PlayerModeController2D>();
         if (GameState != null) 
@@ -58,6 +64,23 @@ public class BotController : Agent
             return;
         }
 
+        bool isCatcher = (GameState.CurrentBombOwner == gameObject);
+        if (_wasCatcher == null || isCatcher != _wasCatcher)
+        {
+            _wasCatcher = isCatcher;
+            if (_behaviorParameters != null)
+            {
+                if (isCatcher && catcherModel != null)
+                {
+                    _behaviorParameters.Model = catcherModel;
+                }
+                else if (!isCatcher && evaderModel != null)
+                {
+                    _behaviorParameters.Model = evaderModel;
+                }
+            }
+        }
+
         if (Time.time >= _nextDecisionTime)
         {
             RequestDecision();
@@ -68,46 +91,13 @@ public class BotController : Agent
         _jumpInput = false;
     }
 
-    // Es crida automàticament cada cop que falla o encerta per reiniciar ràpid
+    // Es crida automàticament per l'agent quan comença l'episodi
     public override void OnEpisodeBegin()
     {
         // 1. Resetejar inputs
         _horizontalInput = 0f;
         _verticalInput = 0f;
         _jumpInput = false;
-
-        // 2. Colocar en los Spawns seguros
-        if (Spawn1 != null && Spawn2 != null)
-        {
-            // Tiramos una moneda (50% de probabilidad) para intercambiarlos de lado
-            // Así la IA no memoriza que siempre sale en el mismo sitio
-            if (Random.value > 0.5f)
-            {
-                transform.position = Spawn1.position;
-                if (OpponentTarget != null) OpponentTarget.position = Spawn2.position;
-            }
-            else
-            {
-                transform.position = Spawn2.position;
-                if (OpponentTarget != null) OpponentTarget.position = Spawn1.position;
-            }
-        }
-
-        // 3. FASE 1 ENTRENAMENT: Forçar que el Bot tingui la bomba inicialment
-        if (GameState != null)
-        {
-            // TRUCO: Le quitamos la bomba a todo el mundo antes de dársela al bot.
-            // Así la bomba no cree que se ha hecho un "pase" y no rompe el bucle.
-            GameState.SetBombOwner(null); 
-            
-            Bomb bomb = FindFirstObjectByType<Bomb>();
-            if (bomb != null)
-            {
-                bomb.TransferTo(this.gameObject);
-                // Restauramos el temporizador para que la bomba vuelva a su tamaño normal
-                GameState.GameTimer = GameState.InitialTimer; 
-            }
-        }
     }
 
     // --- OBSERVACIONS (El que veu el cervell de la IA) ---
@@ -207,16 +197,7 @@ public class BotController : Agent
         else discreteActionsOut[1] = 0;           
     }
 
-    // --- ES CRIDA DES DE BOMB.CS QUAN XOCA AMB ÈXIT ---
 
-    public void OnTaggedTarget()
-    {
-        // Gran premi final per aconseguir l'objectiu de la Fase 1!
-        AddReward(5.0f); 
-        
-        // Reseteja el mapa a l'instant per a la següent ronda d'entrenament
-        EndEpisode();    
-    }
 
     public void ApplySpeedMultiplier(float multiplier)
     {

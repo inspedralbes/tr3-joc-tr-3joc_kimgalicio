@@ -111,7 +111,9 @@ public class BotEvader : Agent
         sensor.AddObservation(transform.position.y);
 
         // 2. Detecció d'escaleres [Total: 1]
-        _isNearLadder = Physics2D.OverlapCircle(transform.position, ladderCheckRadius, ladderLayer);
+        // Afegim un offset vertical per centrar el radar al tors/cap (igual que a BotController)
+        Vector2 checkPosition = (Vector2)transform.position + (Vector2.up * 0.5f);
+        _isNearLadder = Physics2D.OverlapCircle(checkPosition, ladderCheckRadius, ladderLayer);
         sensor.AddObservation(_isNearLadder ? 1f : 0f);
 
         // 3. Posició relativa del jugador (amenassa) respecte al Bot [Total: 2]
@@ -204,7 +206,8 @@ public class BotEvader : Agent
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, ladderCheckRadius);
+        Vector2 checkPos = (Vector2)transform.position + (Vector2.up * 0.5f);
+        Gizmos.DrawWireSphere(checkPos, ladderCheckRadius);
         
         if (OpponentTarget != null)
         {

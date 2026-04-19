@@ -273,7 +273,7 @@ Transform:
   m_GameObject: {fileID: 590795720}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 14.45, y: -2.6900005, z: 9.934526}
+  m_LocalPosition: {x: 14.63, y: -3.13, z: 9.934526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2209,7 +2209,6 @@ GameObject:
   - component: {fileID: 1301766991}
   - component: {fileID: 1301766989}
   - component: {fileID: 1301766998}
-  - component: {fileID: 1301767001}
   - component: {fileID: 1301766999}
   - component: {fileID: 1301766994}
   - component: {fileID: 1301766996}
@@ -2232,7 +2231,7 @@ Transform:
   m_GameObject: {fileID: 1301766987}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 14.45, y: -2.69, z: 9.934526}
+  m_LocalPosition: {x: 14.72, y: -2.72, z: 9.934526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2414,7 +2413,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: BotCatcher
+  m_BehaviorName: BotEvader
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -2497,14 +2496,14 @@ MonoBehaviour:
   MaxStep: 2000
   GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
   Controller: {fileID: 1301766999}
+  OpponentTarget: {fileID: 1581524237}
+  DecisionInterval: 0.2
   ladderLayer:
     serializedVersion: 2
     m_Bits: 8
-  OpponentTarget: {fileID: 1581524237}
-  Spawn1: {fileID: 2022411158}
-  Spawn2: {fileID: 590795721}
-  DecisionInterval: 0.2
   ladderCheckRadius: 0.3
+  catcherModel: {fileID: 5022602860645237092, guid: 00b14a3507d5e674e8acbc8007a4aac7, type: 3}
+  evaderModel: {fileID: 5022602860645237092, guid: 39051cdab1f74f34091b3280f6c640bc, type: 3}
 --- !u!114 &1301766999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2534,6 +2533,7 @@ MonoBehaviour:
     m_Bits: 8
   animator: {fileID: 1301766989}
   spriteRenderer: {fileID: 1301766993}
+  isClimbing: 0
 --- !u!114 &1301767000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2547,33 +2547,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
---- !u!114 &1301767001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1301766987}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec46601d8c3661d4b9b3d0d12fec6db5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
-  GameState: {fileID: 11400000, guid: e490145ad3e658149a72fe42ccfeebe7, type: 2}
-  Controller: {fileID: 1301766999}
-  ladderLayer:
-    serializedVersion: 2
-    m_Bits: 8
-  OpponentTarget: {fileID: 1581524237}
-  Spawn1: {fileID: 2022411158}
-  Spawn2: {fileID: 590795721}
-  DecisionInterval: 0.1
-  ladderCheckRadius: 0.3
-  distanceThreshold: 5
 --- !u!1 &1321095093
 GameObject:
   m_ObjectHideFlags: 0
@@ -2590,7 +2563,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1321095094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2620,7 +2593,7 @@ Transform:
   m_GameObject: {fileID: 1321095093}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.719406, y: -13.510219, z: 0.0018709945}
+  m_LocalPosition: {x: -1.55, y: -13.3, z: 0.0018709945}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2713,7 +2686,7 @@ Transform:
   m_GameObject: {fileID: 1581524235}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.81, y: 5.34, z: 9.934526}
+  m_LocalPosition: {x: 0.64, y: -2.77, z: 9.934526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2844,6 +2817,7 @@ MonoBehaviour:
     m_Bits: 8
   animator: {fileID: 1581524241}
   spriteRenderer: {fileID: 1581524236}
+  isClimbing: 0
 --- !u!114 &1581524243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3061,7 +3035,7 @@ Transform:
   m_GameObject: {fileID: 2022411157}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.78, y: 4.87, z: 9.934526}
+  m_LocalPosition: {x: 0.62, y: -3.12, z: 9.934526}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
