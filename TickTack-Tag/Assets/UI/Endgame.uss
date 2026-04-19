@@ -1,0 +1,102 @@
+/* Root container for the endgame panel */
+#endgame-panel {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(10, 10, 25, 0.85); /* Darker semi-transparent overlay */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px); /* Modern blur effect */
+}
+
+/* Glassmorphism results box */
+#results-box {
+    width: 600px;
+    padding: 60px;
+    background-color: rgba(255, 255, 255, 0.08); /* Transparent white */
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.15);
+    border-right-color: rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+    align-items: center;
+    flex-direction: column;
+}
+
+#endgame-title {
+    font-size: 32px;
+    -unity-font-style: bold;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+    letter-spacing: 5px;
+    -unity-text-align: middle-center;
+}
+
+#divider {
+    width: 80%;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-bottom: 40px;
+}
+
+#lbl-winner {
+    font-size: 42px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    margin-bottom: 60px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+#button-container {
+    width: 100%;
+}
+
+.primary-button {
+    height: 65px;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: white;
+    margin-bottom: 20px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    transition-duration: 0.15s;
+}
+
+.neon-blue {
+    background-color: rgb(0, 110, 230);
+    border-bottom-width: 4px;
+    border-bottom-color: rgb(0, 80, 180);
+}
+
+.neon-blue:hover {
+    background-color: rgb(0, 150, 255);
+    scale: 1.04;
+}
+
+.neon-pink {
+    background-color: rgb(210, 0, 120);
+    border-bottom-width: 4px;
+    border-bottom-color: rgb(150, 0, 80);
+}
+
+.neon-pink:hover {
+    background-color: rgb(255, 0, 170);
+    scale: 1.04;
+}

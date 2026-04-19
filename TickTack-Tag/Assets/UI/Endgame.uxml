@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project:/Assets/UI/Endgame.uss" />
+    
+    <ui:VisualElement name="endgame-panel">
+        <ui:VisualElement name="results-box">
+            <ui:Label text="FINAL DE LA PARTIDA" name="endgame-title" />
+            
+            <ui:VisualElement name="divider" />
+            
+            <ui:Label text="EL GUANYADOR ÉS..." name="lbl-winner" />
+            
+            <ui:VisualElement name="button-container">
+                <ui:Button text="Tornar a jugar" name="btn-restart" class="primary-button neon-blue" />
+                <ui:Button text="Tornar al Menú" name="btn-menu" class="primary-button neon-pink" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

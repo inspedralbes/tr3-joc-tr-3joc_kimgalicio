@@ -110,7 +110,7 @@ public class NetworkManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 JoinResponse response = JsonUtility.FromJson<JoinResponse>(request.downloadHandler.text);
-                GameId = response.gameId;
+                GameId = response.partida.id.ToString();
                 Debug.Log($"[NetworkManager] Unió a la partida correcta. GameId: {GameId}");
                 callback?.Invoke(true);
             }
@@ -325,7 +325,18 @@ public class JoinRequest
 [Serializable]
 public class JoinResponse
 {
-    public string gameId;
+    public string missatge;
+    public PartidaDTO partida;
+}
+
+[Serializable]
+public class PartidaDTO
+{
+    public int id;
+    public string mode;
+    public int player1;
+    public int? player2;
+    public string status;
 }
 
 [Serializable]
