@@ -51,9 +51,6 @@ public class HUDController : MonoBehaviour
             countdownOverlay.style.display = DisplayStyle.None;
             countdownOverlay.visible = false;
         }
-
-        if (lblRound == null) Debug.LogWarning("[HUD] No s'ha trobat 'lbl-round' al UXML.");
-        if (countdownOverlay == null) Debug.LogWarning("[HUD] No s'ha trobat 'countdown-overlay' al UXML.");
     }
 
     private IEnumerator FindEntityNames()
@@ -79,21 +76,11 @@ public class HUDController : MonoBehaviour
         {
             lblRound.text = "RONDA " + gameStateSO.CurrentRound;
         }
-        else 
-        {
-            // Intentem re-inicialitzar si s'ha perdut la referència
-            lblRound = GetComponent<UIDocument>().rootVisualElement.Q<Label>("lbl-round");
-        }
     }
 
     private void UpdateTimer()
     {
-        if (lblTimer == null) 
-        {
-            lblTimer = GetComponent<UIDocument>().rootVisualElement.Q<Label>("lbl-timer");
-            if (lblTimer == null) return;
-        }
-
+        if (lblTimer == null) return;
         int timeLeft = Mathf.CeilToInt(gameStateSO.GameTimer);
         lblTimer.text = timeLeft.ToString();
         lblTimer.style.color = (timeLeft <= 5) ? new StyleColor(Color.red) : new StyleColor(Color.yellow);
@@ -113,7 +100,6 @@ public class HUDController : MonoBehaviour
 
     public void ShowCountdown(System.Action onComplete)
     {
-        // Ens assegurem de tenir les referències abans de començar
         if (countdownOverlay == null || lblCountdown == null) InitializeReferences();
         StartCoroutine(CountdownCoroutine(onComplete));
     }
@@ -122,7 +108,6 @@ public class HUDController : MonoBehaviour
     {
         if (countdownOverlay == null || lblCountdown == null)
         {
-            Debug.LogError("[HUD] ERROR CRÍTIC: No s'ha trobat l'overlay o el label del compte enrere després de re-intentar.");
             onComplete?.Invoke();
             yield break;
         }
@@ -130,21 +115,23 @@ public class HUDController : MonoBehaviour
         countdownOverlay.style.display = DisplayStyle.Flex;
         countdownOverlay.visible = true;
         
-        lblCountdown.text = "Comença la\nRonda " + gameStateSO.CurrentRound;
-        lblCountdown.style.fontSize = 60;
+        // Utilitzem una mida de font conservadora i white-space: nowrap (al UXML) per evitar salts de línia
+        lblCountdown.text = "Comença la Ronda " + gameStateSO.CurrentRound;
+        lblCountdown.style.fontSize = 45; 
         lblCountdown.style.color = new StyleColor(Color.white);
         yield return new WaitForSeconds(1.5f);
 
         for (int i = 3; i > 0; i--)
         {
             lblCountdown.text = i.ToString();
-            lblCountdown.style.fontSize = 160;
-            yield return new WaitForSeconds(0.2f);
             lblCountdown.style.fontSize = 120;
+            yield return new WaitForSeconds(0.2f);
+            lblCountdown.style.fontSize = 100;
             yield return new WaitForSeconds(0.8f);
         }
 
-        lblCountdown.text = "Comença!!";
+        lblCountdown.text = "¡¡Comença!!";
+        lblCountdown.style.fontSize = 70;
         lblCountdown.style.color = new StyleColor(Color.green);
         yield return new WaitForSeconds(0.8f);
 

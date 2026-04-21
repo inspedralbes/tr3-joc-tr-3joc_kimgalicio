@@ -1,5 +1,5 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="main-container" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: column; justify-content: flex-start; padding-top: 20px; padding-left: 30px; padding-right: 30px; height: 100%;">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEngine.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="main-container" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: column; justify-content: flex-start; padding-top: 2%; padding-left: 5%; padding-right: 5%; height: 100%; width: 100%;">
         <ui:VisualElement name="top-row" style="flex-direction: row; justify-content: space-between; align-items: center; width: 100%;">
             <!-- Jugador 1 -->
             <ui:VisualElement name="player1-stats" style="flex-direction: row; align-items: center;">
@@ -24,7 +24,7 @@
 
         <!-- Overlay de Compte Enrere -->
         <ui:VisualElement name="countdown-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; display: none;">
-            <ui:Label text="3" name="lbl-countdown" style="font-size: 120px; color: rgb(255, 255, 255); -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: rgb(0, 0, 0); -unity-text-align: middle-center;" />
+            <ui:Label text="3" name="lbl-countdown" style="font-size: 80px; color: rgb(255, 255, 255); -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: rgb(0, 0, 0); -unity-text-align: middle-center; white-space: nowrap;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -164,6 +164,9 @@ public class GameManager : MonoBehaviour
         // Esperem una mica després de l'explosió
         yield return new WaitForSeconds(1.0f);
 
+        // Incrementem la ronda ABANS de mostrar el compte enrere per el HUD la mostri bé
+        if (GameState != null) GameState.CurrentRound++;
+
         if (HUDController.Instance != null)
         {
             bool countdownFinished = false;
@@ -171,7 +174,7 @@ public class GameManager : MonoBehaviour
                 countdownFinished = true;
             });
 
-            // Esperem que el compte enrere acabi
+            // Esperem que el compte enrere acabi realment
             yield return new WaitUntil(() => countdownFinished);
         }
         else
