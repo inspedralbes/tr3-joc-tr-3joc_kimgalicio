@@ -12,6 +12,7 @@ public class GameStateSO : ScriptableObject
     [Header("Estat de la Partida (Lectura en tiempo real)")]
 
     public float GameTimer;
+    public int CurrentRound = 1;
     public GameObject CurrentBombOwner;
     public bool GameOver;
 
@@ -27,6 +28,7 @@ public class GameStateSO : ScriptableObject
     public void ResetRun()
     {
         GameTimer = InitialTimer;
+        CurrentRound = 1;
         CurrentBombOwner = null;
         GameOver = false;
         WinnerName = "";

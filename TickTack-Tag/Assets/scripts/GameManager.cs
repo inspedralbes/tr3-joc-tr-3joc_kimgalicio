@@ -23,7 +23,8 @@ public class GameManager : MonoBehaviour
 
     void InitializeGame()
     {
-        GameState.ResetRun();
+        if (GameState != null) GameState.ResetRun();
+        
         foreach (var entity in Entities)
         {
             if (entity != null) GameState.InitializeEntity(entity.name);
@@ -159,7 +160,25 @@ public class GameManager : MonoBehaviour
     private IEnumerator RoundResetCoroutine()
     {
         _isTransitioning = true;
-        yield return new WaitForSeconds(1.5f);
+        
+        // Esperem una mica després de l'explosió
+        yield return new WaitForSeconds(1.0f);
+
+        if (HUDController.Instance != null)
+        {
+            bool countdownFinished = false;
+            HUDController.Instance.ShowCountdown(() => {
+                countdownFinished = true;
+            });
+
+            // Esperem que el compte enrere acabi
+            yield return new WaitUntil(() => countdownFinished);
+        }
+        else
+        {
+            yield return new WaitForSeconds(2.0f);
+        }
+
         StartRound();
     }
 
