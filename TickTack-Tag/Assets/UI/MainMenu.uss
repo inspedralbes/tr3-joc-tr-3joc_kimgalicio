@@ -1,126 +1,210 @@
-/* Root container must fill the entire screen */
+/* Reset i Contenidor Base */
 #screen-container {
     flex-grow: 1;
     width: 100%;
     height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: rgb(20, 20, 40);
+    background-color: rgb(10, 10, 15);
     justify-content: center;
     align-items: center;
+    padding: 2%;
 }
 
-/* Glassmorphism box */
-#menu-box {
-    width: 480px;
+/* Glow de fons decoratiu */
+#bg-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background-color: rgba(0, 200, 255, 0.05);
+    border-radius: 300px;
+    -unity-background-image-tint-color: white;
+}
+
+/* Marc Principal (Horizontal) */
+.main-frame {
+    flex-direction: row;
+    background-color: rgba(20, 20, 30, 0.9);
+    border-radius: 20px;
     padding: 60px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border-top-left-radius: 40px;
-    border-top-right-radius: 40px;
-    border-bottom-left-radius: 40px;
-    border-bottom-right-radius: 40px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgba(255, 255, 255, 0.15);
-    border-right-color: rgba(255, 255, 255, 0.15);
-    border-top-color: rgba(255, 255, 255, 0.15);
-    border-bottom-color: rgba(255, 255, 255, 0.15);
+    border-width: 2px;
+    border-color: rgba(0, 255, 255, 0.15);
+    width: 95%;
+    max-width: 1000px;
+    height: auto;
+    max-height: 85%;
     align-items: center;
-    flex-direction: column;
 }
 
-#title {
-    font-size: 56px;
+/* Seccions */
+.section {
+    flex: 1;
+    height: 100%;
+    justify-content: center;
+}
+
+#left-section {
+    align-items: flex-start;
+    padding-right: 50px;
+}
+
+#right-section {
+    padding-left: 50px;
+}
+
+/* Tipografia Títol */
+#brand-container {
+    margin-bottom: 20px;
+}
+
+.title-part {
+    font-size: 40px;
     -unity-font-style: bold;
-    color: rgb(255, 255, 255);
-    margin-bottom: 50px;
-    -unity-text-align: middle-center;
-    letter-spacing: 3px;
+    color: white;
+    margin: -5px 0;
+    letter-spacing: -1px;
 }
 
-#input-container {
-    width: 100%;
-    margin-bottom: 40px;
+.highlight {
+    color: rgb(0, 255, 255);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 255, 255, 0.5);
 }
 
-.input-label {
-    color: rgba(255, 255, 255, 0.7);
+#tagline {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-top: 10px;
+    white-space: nowrap;
+}
+
+#accent-line {
+    width: 50px;
+    height: 3px;
+    background-color: rgb(0, 255, 255);
+    margin-top: 8px;
+}
+
+/* Separador */
+#vertical-divider {
+    width: 25px;
+    height: 70%;
+    align-items: center;
+    justify-content: center;
+}
+
+.divider-line {
+    width: 1px;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.divider-dot {
+    width: 4px;
+    height: 4px;
+    background-color: rgb(0, 255, 255);
+    border-radius: 2px;
+}
+
+/* Formulari Dreta */
+.input-header {
+    flex-direction: row;
+    align-items: center;
     margin-bottom: 12px;
-    font-size: 18px;
+}
+
+.square-accent {
+    width: 8px;
+    height: 8px;
+    background-color: rgb(0, 255, 255);
+    margin-right: 8px;
+}
+
+.section-label {
+    color: white;
+    font-size: 14px;
     -unity-font-style: bold;
+    letter-spacing: 1.5px;
+}
+
+.section-label.small {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 12px;
 }
 
 #nickname-input {
-    height: 55px;
-    background-color: rgba(0, 0, 0, 0.4);
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    padding-left: 20px;
-    color: white;
-    font-size: 20px;
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-left-color: rgba(255, 255, 255, 0.1);
-    border-right-color: rgba(255, 255, 255, 0.1);
-    border-top-color: rgba(255, 255, 255, 0.1);
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    height: 45px;
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgba(0, 255, 255, 0.5);
+    color: rgb(0, 0, 0);
+    padding-left: 15px;
+    font-size: 16px;
+    -unity-font-style: bold;
 }
 
 #nickname-input:focus {
-    border-left-color: rgb(0, 255, 255);
-    border-right-color: rgb(0, 255, 255);
-    border-top-color: rgb(0, 255, 255);
-    border-bottom-color: rgb(0, 255, 255);
+    border-color: rgb(0, 255, 255);
+    background-color: rgb(255, 255, 255);
 }
 
-#button-container {
+.spacer {
+    height: 30px;
+}
+
+/* Botons Estilitzats */
+#button-group {
+    flex-direction: row;
+    justify-content: space-between;
     width: 100%;
 }
 
-.primary-button {
-    height: 65px;
-    border-top-left-radius: 18px;
-    border-top-right-radius: 18px;
-    border-bottom-left-radius: 18px;
-    border-bottom-right-radius: 18px;
-    font-size: 22px;
+.menu-btn {
+    flex: 1;
+    height: 55px;
+    border-radius: 4px;
+    font-size: 15px;
     -unity-font-style: bold;
     color: white;
-    margin-bottom: 20px;
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 0;
-    transition-duration: 0.15s;
+    border-width: 1px;
+    margin: 0 5px;
+    transition-duration: 0.2s;
+    -unity-text-align: middle-center;
+    padding: 0 5px;
 }
 
-.neon-blue {
-    background-color: rgb(0, 110, 230);
+.bot-btn {
+    background-color: transparent;
+    border-color: rgb(0, 150, 255);
+    color: rgb(0, 150, 255);
 }
 
-.neon-blue:hover {
+.bot-btn:hover {
     background-color: rgb(0, 150, 255);
-    scale: 1.04;
+    color: white;
 }
 
-.neon-pink {
+.player-btn {
     background-color: rgb(210, 0, 120);
+    border-color: rgb(210, 0, 120);
 }
 
-.neon-pink:hover {
-    background-color: rgb(255, 0, 170);
-    scale: 1.04;
+.player-btn:hover {
+    background-color: rgb(255, 0, 150);
+    border-color: rgb(255, 0, 150);
 }
 
 #version-label {
-    margin-top: 25px;
-    color: rgba(255, 255, 255, 0.25);
-    font-size: 14px;
+    position: absolute;
+    bottom: -40px;
+    left: 0;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 12px;
+}
+
+/* Responsivitat */
+@media (max-height: 600px) {
+    .main-frame { padding: 30px; }
+    .title-part { font-size: 50px; }
 }
