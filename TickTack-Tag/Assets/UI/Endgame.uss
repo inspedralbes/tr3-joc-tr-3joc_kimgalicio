@@ -6,96 +6,128 @@
     position: absolute;
     top: 0;
     left: 0;
-    background-color: rgba(10, 10, 25, 0.85); /* Darker semi-transparent overlay */
+    background-color: rgba(0, 176, 255, 0.9); /* Sky Blue Overlay */
     justify-content: center;
     align-items: center;
 }
 
-/* Glassmorphism results box */
+/* Efecte de resplendor de victòria */
+#victory-glow {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    background-color: rgba(255, 235, 59, 0.3); /* Gold Glow */
+    border-radius: 350px;
+    -unity-background-image-tint-color: white;
+}
+
+/* Adventure results box - Sky & Grass */
 #results-box {
-    width: 600px;
-    padding: 60px;
-    background-color: rgba(255, 255, 255, 0.08); /* Transparent white */
-    border-top-left-radius: 40px;
-    border-top-right-radius: 40px;
-    border-bottom-left-radius: 40px;
-    border-bottom-right-radius: 40px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-    border-left-color: rgba(255, 255, 255, 0.15);
-    border-right-color: rgba(255, 255, 255, 0.15);
-    border-top-color: rgba(255, 255, 255, 0.15);
-    border-bottom-color: rgba(255, 255, 255, 0.15);
+    width: 650px;
+    padding: 40px;
+    background-color: rgba(46, 204, 113, 0.98); /* Vivid Grass Green */
+    border-radius: 30px;
+    border-width: 6px;
+    border-color: rgb(255, 255, 255); /* White border */
     align-items: center;
     flex-direction: column;
+    overflow: visible;
+}
+
+#banner-container {
+    background-color: rgb(255, 235, 59); /* Sunshine Yellow */
+    padding: 10px 40px;
+    border-radius: 15px;
+    margin-top: -70px;
+    border-width: 4px;
+    border-color: white;
+    rotate: -2deg;
 }
 
 #endgame-title {
-    font-size: 32px;
+    font-size: 38px;
     -unity-font-style: bold;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 20px;
-    letter-spacing: 5px;
+    color: rgb(0, 100, 50); /* Dark Green Text */
     -unity-text-align: middle-center;
 }
 
 #divider {
-    width: 80%;
-    height: 2px;
-    background-color: rgba(255, 255, 255, 0.1);
-    margin-bottom: 40px;
+    width: 90%;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.5);
+    margin: 25px 0;
+}
+
+/* Winner Section */
+#winner-container {
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.decor-dino {
+    width: 120px;
+    height: 120px;
+    background-image: url("project:/Assets/Sprites/Dinos/Vita/DinoSprites - vita.png#DinoSprites - vita_0");
+    -unity-background-scale-mode: scale-to-fit;
+    margin-bottom: 10px;
+}
+
+.sub-text {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    -unity-font-style: bold;
+    letter-spacing: 2px;
 }
 
 #lbl-winner {
-    font-size: 42px;
+    font-size: 52px;
     -unity-font-style: bold;
-    color: rgb(255, 255, 255);
-    margin-bottom: 60px;
+    color: rgb(255, 235, 59); /* Gold Winner Name */
     -unity-text-align: middle-center;
-    white-space: normal;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.5);
+    margin-top: 5px;
 }
 
+/* Button Container */
 #button-container {
+    flex-direction: row;
+    justify-content: space-around;
     width: 100%;
 }
 
 .primary-button {
-    height: 65px;
-    border-top-left-radius: 18px;
-    border-top-right-radius: 18px;
-    border-bottom-left-radius: 18px;
-    border-bottom-right-radius: 18px;
-    font-size: 22px;
+    flex: 1;
+    height: 60px;
+    border-radius: 15px;
+    font-size: 18px;
     -unity-font-style: bold;
     color: white;
-    margin-bottom: 20px;
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 0;
-    transition-duration: 0.15s;
+    margin: 0 10px;
+    border-width: 0;
+    border-bottom-width: 6px;
+    transition-duration: 0.1s;
 }
 
-.neon-blue {
-    background-color: rgb(0, 110, 230);
-    border-bottom-width: 4px;
-    border-bottom-color: rgb(0, 80, 180);
+.primary-button:active {
+    translate: 0 4px;
+    border-bottom-width: 2px;
 }
 
-.neon-blue:hover {
-    background-color: rgb(0, 150, 255);
-    scale: 1.04;
+.restart-btn {
+    background-color: rgb(231, 76, 60); /* Vivid Crimson */
+    border-bottom-color: rgb(192, 57, 43);
 }
 
-.neon-pink {
-    background-color: rgb(210, 0, 120);
-    border-bottom-width: 4px;
-    border-bottom-color: rgb(150, 0, 80);
+.restart-btn:hover {
+    background-color: rgb(236, 112, 99);
 }
 
-.neon-pink:hover {
-    background-color: rgb(255, 0, 170);
-    scale: 1.04;
+.menu-btn {
+    background-color: rgb(21, 101, 192); /* Deep Blue */
+    border-bottom-color: rgb(13, 71, 161);
+}
+
+.menu-btn:hover {
+    background-color: rgb(25, 118, 210);
 }

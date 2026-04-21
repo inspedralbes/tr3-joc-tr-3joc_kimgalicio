@@ -9,6 +9,12 @@
 
         <ui:VisualElement name="main-panel" class="main-frame">
             
+            <!-- Decoracions de Personatges i Bomba -->
+            <ui:VisualElement name="decoration-container">
+                <ui:VisualElement name="bomb-sprite" class="decor-sprite" />
+                <ui:VisualElement name="dino-vita" class="decor-sprite dino-sprite" />
+            </ui:VisualElement>
+
             <!-- Secció Esquerra: Identitat -->
             <ui:VisualElement name="left-section" class="section">
                 <ui:VisualElement name="brand-container">

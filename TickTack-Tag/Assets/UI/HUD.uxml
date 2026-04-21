@@ -7,11 +7,11 @@
                 <ui:Label text="3" name="lbl-lives-p1" style="font-size: 28px; color: rgb(255, 255, 255); -unity-font-style: bold; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(0, 0, 0);" />
             </ui:VisualElement>
 
-            <!-- Temporitzador (Estil Sprite 2D) -->
+            <!-- Temporitzador (Estil Sprite 2D - Aventura) -->
             <ui:VisualElement name="timer-wrapper" style="align-items: center;">
                 <ui:Label text="RONDA 1" name="lbl-round" style="font-size: 16px; color: rgb(255, 255, 255); -unity-font-style: bold; margin-bottom: 2px; -unity-text-outline-width: 1px; -unity-text-outline-color: rgb(0, 0, 0);" />
-                <ui:VisualElement name="timer-container" style="background-color: rgba(30, 30, 30, 0.85); padding: 5px 15px; border-radius: 6px; min-width: 60px; align-items: center; border-width: 3px; border-color: rgb(255, 255, 255); border-bottom-color: rgb(150, 150, 150); border-right-color: rgb(150, 150, 150);">
-                    <ui:Label text="30" name="lbl-timer" style="font-size: 32px; color: rgb(255, 255, 0); -unity-font-style: bold; -unity-text-outline-width: 1px; -unity-text-outline-color: rgba(0, 0, 0, 0.5);" />
+                <ui:VisualElement name="timer-container" style="background-color: rgba(101, 67, 33, 0.9); padding: 5px 15px; border-radius: 6px; min-width: 60px; align-items: center; border-width: 3px; border-color: rgb(210, 180, 140); border-bottom-color: rgb(139, 69, 19); border-right-color: rgb(139, 69, 19);">
+                    <ui:Label text="30" name="lbl-timer" style="font-size: 32px; color: rgb(255, 223, 0); -unity-font-style: bold; -unity-text-outline-width: 1px; -unity-text-outline-color: rgba(0, 0, 0, 0.5);" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
