@@ -117,6 +117,6 @@ public class EndgameController : MonoBehaviour
         }
     }
 
-    private void OnMenuClicked() => SceneManager.LoadScene("MainMenu");
+    private void OnMenuClicked() => SceneManager.LoadScene("Menu");
     private void OnRestartClicked() => SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 }
