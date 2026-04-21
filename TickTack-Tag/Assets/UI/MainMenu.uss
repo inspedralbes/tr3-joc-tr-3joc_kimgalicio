@@ -133,18 +133,29 @@
 }
 
 #nickname-input {
-    height: 45px;
-    background-color: rgba(255, 255, 255, 0.85);
+    width: 100%;
+    margin: 10px 5px;
+    background-color: transparent;
+    border-width: 0;
+}
+
+#nickname-input .unity-text-field__label {
+    display: none;
+}
+
+#nickname-input .unity-text-field__input {
+    background-color: rgba(255, 255, 255, 0.9);
     border-radius: 5px;
     border-width: 1px;
     border-color: rgba(0, 255, 255, 0.5);
-    color: rgb(0, 0, 0);
+    height: 45px;
     padding-left: 15px;
+    color: black;
     font-size: 16px;
     -unity-font-style: bold;
 }
 
-#nickname-input:focus {
+#nickname-input:focus .unity-text-field__input {
     border-color: rgb(0, 255, 255);
     background-color: rgb(255, 255, 255);
 }
