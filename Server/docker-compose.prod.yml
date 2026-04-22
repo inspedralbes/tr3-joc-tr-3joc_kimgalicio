@@ -5,6 +5,8 @@ services:
     image: mysql:8.0
     container_name: ticktack-db-prod
     restart: always
+    env_file:
+      - ./Backend/.env
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -15,7 +17,7 @@ services:
       - ticktack-net
 
   api:
-    build: 
+    build:
       context: ./Backend
       dockerfile: Dockerfile
     container_name: ticktack-api-prod
