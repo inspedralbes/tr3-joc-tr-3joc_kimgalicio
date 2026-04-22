@@ -30,29 +30,23 @@ public class NetworkPlayerSync : MonoBehaviour
 
     private void HandleMoveReceived(string userId, Vector2 position)
     {
-        // En una partida multijugador real de este proyecto:
-        // - Tú eres un objeto (Player1 o Player2)
-        // - El otro jugador es el otro objeto en la lista Entities del GameManager.
-        
-        if (_gameManager == null || _gameManager.Entities == null) return;
+        if (_gameManager == null || _gameManager.Entities == null || NetworkManager.Instance == null) return;
 
-        foreach (var entity in _gameManager.Entities)
+        // Identifiquem quina entitat hem de moure basant-nos en el ID
+        int targetIndex = -1;
+        var data = NetworkManager.Instance.CurrentGameData;
+        if (data == null) return;
+
+        if (userId == data.player1.ToString()) targetIndex = 0;
+        else if (data.player2.HasValue && userId == data.player2.Value.ToString()) targetIndex = 1;
+
+        if (targetIndex != -1 && targetIndex < _gameManager.Entities.Length)
         {
-            if (entity == null) continue;
-
-            // Buscamos al jugador remoto. 
-            // Si el objeto NO es controlado por el jugador local (useAiInput o similar), lo movemos.
-            var controller = entity.GetComponent<PlayerModeController2D>();
-            if (controller != null && (controller.useAiInput || entity.name.Contains("Player")))
+            GameObject entity = _gameManager.Entities[targetIndex];
+            if (entity != null && userId != NetworkManager.Instance.UserId)
             {
-                // Estrategia simple: si el nombre del objeto NO es el nuestro, lo movemos.
-                // En este proyecto, los IDs se suelen asignar secuencialmente o por nombre.
-                // Por ahora, moveremos cualquier entidad que no sea la local y coincida con el patrón.
-                if (NetworkManager.Instance != null && userId != NetworkManager.Instance.UserId)
-                {
-                    // Aplicamos interpolación simple o posición directa
-                    entity.transform.position = Vector3.Lerp(entity.transform.position, new Vector3(position.x, position.y, 0), Time.deltaTime * 15f);
-                }
+                // Moure l'entitat remota
+                entity.transform.position = Vector3.Lerp(entity.transform.position, new Vector3(position.x, position.y, 0), Time.deltaTime * 15f);
             }
         }
     }

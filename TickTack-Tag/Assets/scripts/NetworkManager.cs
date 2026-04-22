@@ -19,6 +19,7 @@ public class NetworkManager : MonoBehaviour
     public string PlayerNickname { get; private set; }
     public GameModeType GameMode { get; private set; }
     public bool IsBotGame => GameMode == GameModeType.VsBot;
+    public bool IsPlayer1 => CurrentGameData != null && UserId == CurrentGameData.player1.ToString();
     public PartidaDTO CurrentGameData { get; private set; }
 
     private WebSocket _websocket;

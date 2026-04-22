@@ -94,17 +94,46 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        foreach (var entity in Entities)
+        for (int i = 0; i < Entities.Length; i++)
         {
-            if (entity != null)
+            var entity = Entities[i];
+            if (entity == null) continue;
+
+            if (GameState.SelectedMode == GameModeType.VsPlayer)
             {
-                if (GameState.SelectedMode == GameModeType.VsPlayer && (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot")))
+                if (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot"))
                 {
                     entity.SetActive(false);
+                    continue;
+                }
+
+                entity.SetActive(true);
+                var controller = entity.GetComponent<PlayerModeController2D>();
+                if (controller != null && NetworkManager.Instance != null)
+                {
+                    // Suposem: Entities[0] és el Jugador 1 (Creador), Entities[1] és el Jugador 2 (Convidat)
+                    bool sócJugador1 = NetworkManager.Instance.IsPlayer1;
+                    bool aquestaEntitatÉsJugador1 = (i == 0);
+
+                    // Si sóc el 1 i l'entitat és la 1, NO és AI. Si sóc el 1 i l'entitat és la 2, SÍ és AI.
+                    controller.useAiInput = (sócJugador1 != aquestaEntitatÉsJugador1);
+                    Debug.Log($"[GameManager] {entity.name} configurat com a {(controller.useAiInput ? "REMOTO (AI Input)" : "LOCAL")}");
+                }
+                GameState.InitializeEntity(entity.name);
+            }
+            else
+            {
+                // Mode Vs Bot original
+                if (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot"))
+                {
+                    entity.SetActive(true);
+                    GameState.InitializeEntity(entity.name);
                 }
                 else
                 {
                     entity.SetActive(true);
+                    var controller = entity.GetComponent<PlayerModeController2D>();
+                    if (controller != null) controller.useAiInput = false;
                     GameState.InitializeEntity(entity.name);
                 }
             }
@@ -294,9 +323,25 @@ public class GameManager : MonoBehaviour
         {
             if (entity != null && entity.activeInHierarchy && !GameState.Spectators.Contains(entity.name)) candidates.Add(entity);
         }
+
         if (candidates.Count > 0)
         {
-            GameObject newOwner = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            int index = 0;
+
+            // En multijugador, usem l'ID de la partida com a llavor perquè tots els clients triïn el mateix
+            if (GameState.SelectedMode == GameModeType.VsPlayer && NetworkManager.Instance != null && NetworkManager.Instance.CurrentGameData != null)
+            {
+                int seed = NetworkManager.Instance.CurrentGameData.id;
+                System.Random rnd = new System.Random(seed);
+                index = rnd.Next(0, candidates.Count);
+                Debug.Log($"[GameManager] Assignació determinista de bomba (Llavors: {seed}). Índex: {index}");
+            }
+            else
+            {
+                index = UnityEngine.Random.Range(0, candidates.Count);
+            }
+
+            GameObject newOwner = candidates[index];
             Bomb bomb = FindFirstObjectByType<Bomb>();
             if (bomb != null && newOwner != null) bomb.TransferTo(newOwner);
         }
