@@ -236,7 +236,11 @@ public class GameManager : MonoBehaviour
         // --- MULTIPLAYER SYNC ---
         if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
         {
-            NetworkManager.Instance.SendExplosion(GameState.GetLives(deadEntity.name), deadEntity.name);
+            string loserId = GetUserIdOf(deadEntity);
+            if (!string.IsNullOrEmpty(loserId))
+            {
+                NetworkManager.Instance.SendExplosion(GameState.GetLives(deadEntity.name), loserId);
+            }
         }
 
         if (GameState.GetLives(deadEntity.name) <= 0)
@@ -342,5 +346,33 @@ public class GameManager : MonoBehaviour
             Bomb bomb = FindFirstObjectByType<Bomb>();
             if (bomb != null && newOwner != null) bomb.TransferTo(newOwner);
         }
+    }
+    public string GetUserIdOf(GameObject entity)
+    {
+        if (NetworkManager.Instance == null || NetworkManager.Instance.CurrentGameData == null) return "";
+
+        for (int i = 0; i < Entities.Length; i++)
+        {
+            if (Entities[i] == entity)
+            {
+                if (i == 0) return NetworkManager.Instance.CurrentGameData.player1.ToString();
+                if (i == 1 && NetworkManager.Instance.CurrentGameData.player2.HasValue) 
+                    return NetworkManager.Instance.CurrentGameData.player2.Value.ToString();
+            }
+        }
+        return "";
+    }
+
+    public GameObject GetEntityById(string userId)
+    {
+        if (NetworkManager.Instance == null || NetworkManager.Instance.CurrentGameData == null) return null;
+
+        var data = NetworkManager.Instance.CurrentGameData;
+        if (data == null) return null;
+
+        if (userId == data.player1.ToString()) return Entities[0];
+        if (data.player2.HasValue && userId == data.player2.Value.ToString()) return Entities[1];
+
+        return null;
     }
 }
