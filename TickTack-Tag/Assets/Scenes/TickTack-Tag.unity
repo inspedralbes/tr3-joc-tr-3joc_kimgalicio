@@ -6083,7 +6083,6 @@ MonoBehaviour:
   PlayerSpawnPoints:
   - {fileID: 321490409}
   - {fileID: 573336887}
-  forceBotStart: 1
   useCoopCamera: 1
   cameraSmoothTime: 0.3
   minZoom: 5
