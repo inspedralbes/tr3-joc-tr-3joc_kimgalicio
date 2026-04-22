@@ -16,6 +16,7 @@ Aquesta carpeta centralitza tots els recursos tècnics, diagrames i especificaci
 | 📋 **[04_CONVENTIONS](context/04_CONVENTIONS.md)** | Estàndards de codi i estructura del repositori. |
 | 📅 **[05_BACKLOG](context/05_BACKLOG.md)** | Gestió de tasques, priorització i estat actual. |
 | 🗺️ **[06_SYSTEM_MAP](context/06_SYSTEM_MAP.md)** | Diagrama Mermaid de la infraestructura del joc. |
+| 📜 **[prompts-log](../prompts-log.md)** | Log de traçabilitat amb els prompts utilitzats per a la creació del projecte. |
 
 ### 🔍 Especificacions Tècniques (`doc/openspec/specs/`)
 * 📑 **[spec.md](openspec/specs/spec.md)**: Detall de les mecàniques de joc i flux de xarxa.

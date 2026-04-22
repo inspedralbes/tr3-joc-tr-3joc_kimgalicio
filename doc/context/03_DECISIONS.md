@@ -23,3 +23,15 @@ S'ha adoptat **UI Toolkit** (UXML/USS) per al desenvolupament de la interfície 
 En lloc d'un únic model per a tot, s'utilitza una tècnica de "Brain Swapping".
 - **Per què**: Permet al bot ser extremadament bo en rols oposats (perseguir vs fugir) canviant el model neuronal en temps real basant-se en si té la bomba o no, evitant que un sol model hagi d'aprendre dos comportaments en conflicte.
 
+## Unity New Input System
+S'ha abandonat l'enfocament d'Input.GetAxis heredat per l'Input System modern (Package Com.unity.inputsystem).
+- **Per què**: Permet un mapeig més net per a diferents controladors (comandament, teclat) i facilita la injecció de controls calculats per la IA en el mode heuristic de ML-Agents.
+
+## Patró Repository al Backend
+L'accés a dades a Node.js no es fa directament des dels controladors, sinó a través de Repositoris.
+- **Per què**: Facilita el manteniment i permet canviar de base de dades (ex: de MySQL a una altra) sense tocar la lògica de negocis dels serveis o controladors.
+
+## Sincronització Determinista en servidors "Dumb"
+En lloc de fer que el servidor enviï l'estat inicial de la bomba o el temps, els clients calculen aquests valors de forma determinista.
+- **Per què**: Redueix la càrrega del servidor i la complexitat del codi backend, permetent que un servidor de simple broadcast (WebSockets) mantingui la coherència total de la partida usant l'ID de la sala com a llavor aleatòria compartida.
+

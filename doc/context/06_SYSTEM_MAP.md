@@ -6,11 +6,13 @@
 graph TD
     %% Client Unity
     subgraph Unity_Client
-        NM[NetworkManager] --> GSO[GameStateSO]
+        ISA[Input System Actions] --> PC[PlayerModeController2D]
+        BC[BotController] --> PC
+        BC -- Inference --> IM[IA_Models .onnx]
+        PC --> GSO[GameStateSO]
+        NM[NetworkManager] --> GSO
         GM[GameManager] --> GSO
         GM --> TD[TimerDisplay]
-        PC[PlayerModeController2D] --> GSO
-        BC[BotController] --> PC
         B[Bomb] --> GSO
         UI[UI Toolkit Controllers] --> NM
     end

@@ -3,14 +3,15 @@
 ## 1. Entitats i Connexió
 - **Entitats**: De 2 a 3 jugadors. Poden ser humans (online) o bots (locals).
 - **Accés**: Els jugadors han de fer login amb un nickname. Si el nickname no existeix, es crea un nou usuari a la base de dades MySQL.
-- **Multijugador**: Connexió via WebSockets per sincronitzar moviments, transferències de bomba i esdeveniments de victòria.
+- **Multijugador**: Connexió via WebSockets. S'intercanvien missatges de tipus `move` (amb `{position: {x,y}}`), `bomb_transfer` i `game_over`.
 
 ## 2. Mecànica de la Bomba i Avantatges
-- **Assignació**: Una entitat rep la bomba a l'inici. En mode online, el servidor determina qui comença.
+- **Assignació**: Una entitat rep la bomba a l'inici. En mode online, s'utilitza una llavor determinista basada en l'ID de la partida perquè tots els clients triïn el mateix usuari inicial.
 - **Visuals**:
   - Portador: Contorn VERMELL i indicador flotant.
   - Altres: Contorn NEGRE.
-- **Buff de Velocitat**: El portador és un 15% més ràpid per permetre la persecució efectiva.
+- **IA Determinista**: Els bots actuen com a `Catcher` (persegueixen el target) o `Evader` (fugeixen del portador) mitjançant el sistema de Brain Swapping.
+- **Buff de Velocitat**: El portador rep un increment de velocitat d'un 15% gestionat pel `PlayerModeController2D`.
 
 ## 3. Bucle de Joc i Vides
 - **Vides**: Cada entitat comença amb 3 vides (valor configurable via `GameStateSO`).
@@ -22,8 +23,8 @@
 ## 4. Flux de Partida (Híbrid)
 - **Mode Local**: El `GameManager` gestiona els respawns i el reinici de la ronda ràpidament.
 - **Mode Online**:
-  - Els clients envien la seva posició i reben la dels altres.
-  - Les col·lisions pro-actives (Tag) s'envien al servidor, que valida i re-emet el canvi d'estat a tots els clients.
+  - Flux de dades: Unity `NetworkManager` -> Server (Broadcast) -> Unity Clients.
+  - Sincronització de bomba: L'usuari que detecta la col·lisió emet un `bomb_transfer` que l'altre client valida determinísticament.
 
 ## 5. Fi del Joc i Resultats
 - **Condició de Victòria**: L'última entitat amb vides és el guanyador.

@@ -5,7 +5,7 @@
 - [x] **Multijugador Base**: Connexió WebSocket i sincronització d'estats.
 - [x] **UI Toolkit**: Menús i pantalles final de partida implementats.
 - [ ] **Optimització de Xarxa**: Reduir la latència en la sincronització del moviment.
-- [ ] **Sincronització de Morts**: Assegurar que les explosions i caigudes es reflecteixin igual en tots els clients.
+- [x] **Sincronització de Morts**: Assegurar que les explosions i caigudes es reflecteixin igual en tots els clients.
 
 ## Prioritat Mitjana
 - [x] **IA "Brain Swapping"**: Canviar entre perseguir i fugir segons l'estat de la bomba.
