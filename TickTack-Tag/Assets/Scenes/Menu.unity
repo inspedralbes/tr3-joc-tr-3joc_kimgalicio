@@ -163,8 +163,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 956a2b756676ced48a2248c8190f978c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  httpUrl: http://localhost:3000
-  wsUrl: ws://localhost:3000
+  useProduction: 1
+  prodHttpUrl: http://ticktack-tag.dam.inspedralbes.cat
+  prodWsUrl: ws://ticktack-tag.dam.inspedralbes.cat
+  localHttpUrl: http://localhost:3000
+  localWsUrl: ws://localhost:3000
 --- !u!1 &499633112
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,7 +262,7 @@ MonoBehaviour:
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 0}
+  m_PanelSettings: {fileID: 11400000, guid: d3697ca80ac1eeb42b5fda0843102f16, type: 2}
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: ee9257fdd1ca571459cb45a658d7d109, type: 3}
   m_SortingOrder: 10
