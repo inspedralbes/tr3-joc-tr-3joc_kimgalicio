@@ -17,6 +17,9 @@ public class NetworkManager : MonoBehaviour
     public string UserId { get; private set; }
     public string GameId { get; private set; }
     public string PlayerNickname { get; private set; }
+    public GameModeType GameMode { get; private set; }
+    public bool IsBotGame => GameMode == GameModeType.VsBot;
+    public PartidaDTO CurrentGameData { get; private set; }
 
     private WebSocket _websocket;
 
@@ -77,14 +80,16 @@ public class NetworkManager : MonoBehaviour
         }
     }
 
-    public void JoinGame(string mode, Action<bool> callback = null)
+    public void JoinGame(GameModeType mode, Action<bool> callback = null)
     {
-        StartCoroutine(PostJoin(mode, callback));
+        GameMode = mode;
+        string modeStr = (mode == GameModeType.VsBot) ? "vs_bot" : "vs_player";
+        StartCoroutine(PostJoin(modeStr, callback));
     }
 
-    private IEnumerator PostJoin(string mode, Action<bool> callback)
+    private IEnumerator PostJoin(string modeStr, Action<bool> callback)
     {
-        JoinRequest data = new JoinRequest { userId = UserId, mode = mode };
+        JoinRequest data = new JoinRequest { userId = UserId, mode = modeStr };
         string json = JsonUtility.ToJson(data);
 
         using (UnityWebRequest request = new UnityWebRequest($"{httpUrl}/api/games/join", "POST"))
@@ -100,8 +105,12 @@ public class NetworkManager : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 JoinResponse response = JsonUtility.FromJson<JoinResponse>(request.downloadHandler.text);
-                GameId = response.partida.id.ToString();
-                Debug.Log($"[NetworkManager] Unió a la partida correcta. GameId: {GameId}");
+                CurrentGameData = response.partida;
+                GameId = CurrentGameData.id.ToString();
+
+                string opponentInfo = IsBotGame ? "un BOT" : (CurrentGameData.player2.HasValue ? "un Jugador" : "esperant Jugador");
+                Debug.Log($"[NetworkManager] Unió a la partida correcta. ID: {GameId} | Mode: {GameMode} | Contra: {opponentInfo}");
+                
                 callback?.Invoke(true);
             }
             else

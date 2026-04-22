@@ -2,13 +2,19 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+public enum GameModeType
+{
+    VsBot,
+    VsPlayer
+}
+
 [CreateAssetMenu(menuName = "Game/Game State")]
 public class GameStateSO : ScriptableObject
 {
     [Header("Configuració")]
     public float InitialTimer = 30f;
     public int MaxLives = 3;
-    public string SelectedMode; // "vs_bot" o "vs_player"
+    public GameModeType SelectedMode;
 
     [Header("Estat de la Partida (Lectura en tiempo real)")]
 

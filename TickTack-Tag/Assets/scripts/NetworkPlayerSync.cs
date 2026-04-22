@@ -12,6 +12,12 @@ public class NetworkPlayerSync : MonoBehaviour
 
     private void OnEnable()
     {
+        if (NetworkManager.Instance != null && NetworkManager.Instance.IsBotGame)
+        {
+            this.enabled = false;
+            return;
+        }
+
         NetworkManager.OnMoveReceived += HandleMoveReceived;
         NetworkManager.OnBombTransferReceived += HandleBombTransferReceived;
     }

@@ -35,55 +35,6 @@ public class GameManager : MonoBehaviour
         _mainCamera = Camera.main;
     }
 
-    private void OnEnable()
-    {
-        NetworkManager.OnMoveReceived += HandleNetworkMove;
-        NetworkManager.OnBombTransferReceived += HandleNetworkBombTransfer;
-    }
-
-    private void OnDisable()
-    {
-        NetworkManager.OnMoveReceived -= HandleNetworkMove;
-        NetworkManager.OnBombTransferReceived -= HandleNetworkBombTransfer;
-    }
-
-    private void HandleNetworkMove(string userId, Vector2 position)
-    {
-        if (Entities == null) return;
-
-        foreach (var entity in Entities)
-        {
-            if (entity == null) continue;
-
-            var controller = entity.GetComponent<PlayerModeController2D>();
-            if (controller != null)
-            {
-                if (NetworkManager.Instance != null && userId != NetworkManager.Instance.UserId)
-                {
-                    if (entity.name.Contains("Player"))
-                    {
-                        entity.transform.position = Vector3.Lerp(entity.transform.position, new Vector3(position.x, position.y, 0), Time.deltaTime * 15f);
-                    }
-                }
-            }
-        }
-    }
-
-    private void HandleNetworkBombTransfer(string newOwnerName)
-    {
-        Bomb bomb = FindFirstObjectByType<Bomb>();
-        if (bomb == null) return;
-
-        foreach (var entity in Entities)
-        {
-            if (entity != null && entity.name == newOwnerName)
-            {
-                bomb.TransferTo(entity);
-                break;
-            }
-        }
-    }
-
     void Start()
     {
         if (GameState == null) return;
@@ -94,7 +45,7 @@ public class GameManager : MonoBehaviour
     {
         if (GameState != null)
         {
-            if (GameState.SelectedMode == "vs_player")
+            if (GameState.SelectedMode == GameModeType.VsPlayer)
             {
                 GameState.InitialTimer = 90f;
             }
@@ -105,7 +56,7 @@ public class GameManager : MonoBehaviour
 
             GameState.ResetRun();
             
-            if (GameState.SelectedMode == "vs_bot")
+            if (GameState.SelectedMode == GameModeType.VsBot)
             {
                 if (Map_Bot != null) Map_Bot.SetActive(true);
                 if (Map_Player != null) Map_Player.SetActive(false);
@@ -125,7 +76,7 @@ public class GameManager : MonoBehaviour
         {
             if (entity != null)
             {
-                if (GameState.SelectedMode == "vs_player" && (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot")))
+                if (GameState.SelectedMode == GameModeType.VsPlayer && (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot")))
                 {
                     entity.SetActive(false);
                 }

@@ -50,8 +50,9 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    private void StartConnectionFlow(string mode)
+    private void StartConnectionFlow(string modeStr)
     {
+        GameModeType mode = (modeStr == "vs_player") ? GameModeType.VsPlayer : GameModeType.VsBot;
         if (_gameState != null) _gameState.SelectedMode = mode;
         SetButtonsInteractable(false);
 
@@ -65,7 +66,7 @@ public class MenuController : MonoBehaviour
         {
             if (loginSuccess)
             {
-                Debug.Log($"[MenuController] FASE 2: Login correcte. Unint-se a partida mode: {mode}");
+                Debug.Log($"[MenuController] FASE 2: Login correcte. Unint-se a partida mode: {modeStr}");
 
                 NetworkManager.Instance.JoinGame(mode, (joinSuccess) =>
                 {
