@@ -10,10 +10,81 @@ public class GameManager : MonoBehaviour
     public GameObject[] Entities;
     public Transform[] SpawnPoints;
 
+    [Header("Maps & Spawns")]
+    [SerializeField] private GameObject Map_Bot;
+    [SerializeField] private GameObject Map_Player;
+    [SerializeField] private Transform[] BotSpawnPoints;
+    [SerializeField] private Transform[] PlayerSpawnPoints;
+
     [Header("Bomba Config")]
     [SerializeField] private bool forceBotStart = true;
 
+    [Header("Co-op Camera Settings")]
+    [SerializeField] private bool useCoopCamera = true;
+    [SerializeField] private float cameraSmoothTime = 0.3f;
+    [SerializeField] private float minZoom = 5f;
+    [SerializeField] private float maxZoom = 12f;
+    [SerializeField] private float zoomLimiter = 40f;
+
+    private Camera _mainCamera;
+    private Vector3 _cameraVelocity;
     private bool _isTransitioning = false;
+
+    private void Awake()
+    {
+        _mainCamera = Camera.main;
+    }
+
+    private void OnEnable()
+    {
+        NetworkManager.OnMoveReceived += HandleNetworkMove;
+        NetworkManager.OnBombTransferReceived += HandleNetworkBombTransfer;
+    }
+
+    private void OnDisable()
+    {
+        NetworkManager.OnMoveReceived -= HandleNetworkMove;
+        NetworkManager.OnBombTransferReceived -= HandleNetworkBombTransfer;
+    }
+
+    private void HandleNetworkMove(string userId, Vector2 position)
+    {
+        if (Entities == null) return;
+
+        foreach (var entity in Entities)
+        {
+            if (entity == null) continue;
+
+            var controller = entity.GetComponent<PlayerModeController2D>();
+            if (controller != null)
+            {
+                // Si el objeto no es el local, lo sincronizamos
+                if (NetworkManager.Instance != null && userId != NetworkManager.Instance.UserId)
+                {
+                    // Solo sincronizamos si es un jugador remoto (que suele tener useAiInput o un nombre específico)
+                    if (entity.name.Contains("Player"))
+                    {
+                        entity.transform.position = Vector3.Lerp(entity.transform.position, new Vector3(position.x, position.y, 0), Time.deltaTime * 15f);
+                    }
+                }
+            }
+        }
+    }
+
+    private void HandleNetworkBombTransfer(string newOwnerName)
+    {
+        Bomb bomb = FindFirstObjectByType<Bomb>();
+        if (bomb == null) return;
+
+        foreach (var entity in Entities)
+        {
+            if (entity != null && entity.name == newOwnerName)
+            {
+                bomb.TransferTo(entity);
+                break;
+            }
+        }
+    }
 
     void Start()
     {
@@ -23,11 +94,40 @@ public class GameManager : MonoBehaviour
 
     void InitializeGame()
     {
-        if (GameState != null) GameState.ResetRun();
+        if (GameState != null)
+        {
+            GameState.ResetRun();
+            
+            // Lògica d'intercanvi de mapes
+            if (GameState.SelectedMode == "vs_bot")
+            {
+                if (Map_Bot != null) Map_Bot.SetActive(true);
+                if (Map_Player != null) Map_Player.SetActive(false);
+                SpawnPoints = BotSpawnPoints;
+            }
+            else // vs_player
+            {
+                if (Map_Bot != null) Map_Bot.SetActive(false);
+                if (Map_Player != null) Map_Player.SetActive(true);
+                SpawnPoints = PlayerSpawnPoints;
+            }
+        }
         
         foreach (var entity in Entities)
         {
-            if (entity != null) GameState.InitializeEntity(entity.name);
+            if (entity != null)
+            {
+                // Si estem en mode player, desactivem el bot
+                if (GameState.SelectedMode == "vs_player" && (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot")))
+                {
+                    entity.SetActive(false);
+                }
+                else
+                {
+                    entity.SetActive(true);
+                    GameState.InitializeEntity(entity.name);
+                }
+            }
         }
         StartRound();
     }
@@ -68,6 +168,41 @@ public class GameManager : MonoBehaviour
         if (GameState.GameOver || _isTransitioning) return;
 
         GameState.UpdateTimer(Time.deltaTime);
+    }
+
+    private void LateUpdate()
+    {
+        if (!useCoopCamera || _mainCamera == null || Entities == null || Entities.Length == 0) return;
+
+        List<GameObject> targets = new List<GameObject>();
+        foreach (var entity in Entities)
+        {
+            if (entity != null && entity.activeInHierarchy)
+            {
+                if (GameState != null && !GameState.Spectators.Contains(entity.name))
+                {
+                    targets.Add(entity);
+                }
+            }
+        }
+
+        if (targets.Count == 0) return;
+
+        // Move Camera
+        Bounds bounds = new Bounds(targets[0].transform.position, Vector3.zero);
+        for (int i = 0; i < targets.Count; i++)
+        {
+            bounds.Encapsulate(targets[i].transform.position);
+        }
+
+        Vector3 centerPoint = bounds.center;
+        Vector3 newPosition = new Vector3(centerPoint.x, centerPoint.y, -10f);
+        _mainCamera.transform.position = Vector3.SmoothDamp(_mainCamera.transform.position, newPosition, ref _cameraVelocity, cameraSmoothTime);
+
+        // Zoom Camera
+        float greatestDistance = bounds.size.x > bounds.size.y ? bounds.size.x : bounds.size.y;
+        float newZoom = Mathf.Lerp(minZoom, maxZoom, greatestDistance / zoomLimiter);
+        _mainCamera.orthographicSize = Mathf.Lerp(_mainCamera.orthographicSize, newZoom, Time.deltaTime * 2f);
     }
 
     public void HandleDeath(GameObject deadEntity)

@@ -164,6 +164,12 @@ public class PlayerModeController2D : MonoBehaviour
                 jumpRequested = false;
             }
         }
+
+        // --- MULTIPLAYER SYNC ---
+        if (!useAiInput && NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
+        {
+            NetworkManager.Instance.SendMove(rb.position);
+        }
     }
 
     private void OnTriggerStay2D(Collider2D collision)

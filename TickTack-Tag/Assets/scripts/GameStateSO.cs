@@ -8,6 +8,7 @@ public class GameStateSO : ScriptableObject
     [Header("Configuració")]
     public float InitialTimer = 30f;
     public int MaxLives = 3;
+    public string SelectedMode; // "vs_bot" o "vs_player"
 
     [Header("Estat de la Partida (Lectura en tiempo real)")]
 

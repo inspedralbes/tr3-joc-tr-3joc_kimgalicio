@@ -104,8 +104,20 @@ public class EndgameController : MonoBehaviour
             else
             {
                 string localUserId = (NetworkManager.Instance != null) ? NetworkManager.Instance.UserId : "";
-                string nickname = (winnerId.ToString() == localUserId) ? "TU HAS GUANYAT!" : $"JUGADOR {winnerId} GUANYA!";
-                _lblWinner.text = $"{nickname}\nRestaven {winnerHearts} cors.";
+                string nickname = "";
+
+                if (winnerId.ToString() == localUserId)
+                {
+                    nickname = (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.PlayerNickname))
+                        ? NetworkManager.Instance.PlayerNickname
+                        : "TU HAS GUANYAT!";
+                }
+                else
+                {
+                    nickname = $"JUGADOR {winnerId}";
+                }
+
+                _lblWinner.text = $"{nickname.ToUpper()} HA GUANYAT!\nRestaven {winnerHearts} cors.";
             }
         }
 

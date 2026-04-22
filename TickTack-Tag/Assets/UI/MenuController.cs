@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class MenuController : MonoBehaviour
 {
+    [SerializeField] private GameStateSO _gameState;
     [SerializeField] private UIDocument _uiDocument;
     private TextField _nicknameInput;
     private Button _btnVsBot;
@@ -51,7 +52,7 @@ public class MenuController : MonoBehaviour
 
     private void StartConnectionFlow(string mode)
     {
-
+        if (_gameState != null) _gameState.SelectedMode = mode;
         SetButtonsInteractable(false);
 
         string nickname = (_nicknameInput != null && !string.IsNullOrEmpty(_nicknameInput.value))

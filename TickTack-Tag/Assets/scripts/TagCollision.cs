@@ -18,6 +18,12 @@ public class TagCollision : MonoBehaviour
                 if (bomb != null)
                 {
                     bomb.TransferTo(collision.gameObject);
+
+                    // --- MULTIPLAYER SYNC ---
+                    if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
+                    {
+                        NetworkManager.Instance.SendBombTransfer(collision.gameObject.name);
+                    }
                 }
             }
         }

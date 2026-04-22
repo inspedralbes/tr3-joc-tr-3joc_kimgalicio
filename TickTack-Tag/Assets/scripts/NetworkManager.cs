@@ -16,6 +16,7 @@ public class NetworkManager : MonoBehaviour
 
     public string UserId { get; private set; }
     public string GameId { get; private set; }
+    public string PlayerNickname { get; private set; }
 
     private WebSocket _websocket;
 
@@ -64,7 +65,8 @@ public class NetworkManager : MonoBehaviour
             {
                 LoginResponse response = JsonUtility.FromJson<LoginResponse>(request.downloadHandler.text);
                 UserId = response.userId.ToString();
-                Debug.Log($"[NetworkManager] Login correcte. UserId: {UserId}");
+                PlayerNickname = nickname;
+                Debug.Log($"[NetworkManager] Login correcte. UserId: {UserId}, Nickname: {PlayerNickname}");
                 callback?.Invoke(true);
             }
             else
