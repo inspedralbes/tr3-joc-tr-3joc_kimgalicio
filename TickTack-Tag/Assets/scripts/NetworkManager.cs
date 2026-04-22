@@ -11,8 +11,14 @@ public class NetworkManager : MonoBehaviour
     public static NetworkManager Instance { get; private set; }
 
     [Header("Configuració de Xarxa")]
-    [SerializeField] private string httpUrl = "http://localhost:3000";
-    [SerializeField] private string wsUrl = "ws://localhost:3000";
+    [SerializeField] private bool useProduction = true;
+    [SerializeField] private string prodHttpUrl = "http://ticktack-tag.dam.inspedralbes.cat";
+    [SerializeField] private string prodWsUrl = "ws://ticktack-tag.dam.inspedralbes.cat";
+    [SerializeField] private string localHttpUrl = "http://localhost:3000";
+    [SerializeField] private string localWsUrl = "ws://localhost:3000";
+
+    private string httpUrl;
+    private string wsUrl;
 
     public string UserId { get; private set; }
     public string GameId { get; private set; }
@@ -33,6 +39,9 @@ public class NetworkManager : MonoBehaviour
 
     private void Awake()
     {
+        // Configurem les URLs segons si estem en producció o local
+        httpUrl = useProduction ? prodHttpUrl : localHttpUrl;
+        wsUrl = useProduction ? prodWsUrl : localWsUrl;
 
         if (Instance == null)
         {
