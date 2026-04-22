@@ -121,3 +121,12 @@ env/
 
 # Configuración local de Visual Studio Code
 .vscode/
+
+# --- PRODUCCTION & DEPLOY ---
+# Evitem pujar dades persistents de BD
+mysql_prod_data/
+mysql_data/
+
+# Opcional: Si prefereixes no pujar el build de WebGL (perquè el fas directament al servidor o via scp)
+# Frontend/*
+# !Frontend/.gitkeep

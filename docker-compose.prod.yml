@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ticktack-db-prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - ./Backend/database.sql:/docker-entrypoint-initdb.d/setup.sql
+      - mysql_prod_data:/var/lib/mysql
+    networks:
+      - ticktack-net
+
+  api:
+    build: 
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: ticktack-api-prod
+    restart: always
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - db
+    networks:
+      - ticktack-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: ticktack-web-prod
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./Frontend:/var/www/frontend:ro
+    depends_on:
+      - api
+    networks:
+      - ticktack-net
+
+networks:
+  ticktack-net:
+    driver: bridge
+
+volumes:
+  mysql_prod_data:
