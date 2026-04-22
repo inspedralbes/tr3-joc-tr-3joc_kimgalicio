@@ -16,9 +16,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform[] BotSpawnPoints;
     [SerializeField] private Transform[] PlayerSpawnPoints;
 
-    [Header("Bomba Config")]
-    [SerializeField] private bool forceBotStart = true;
-
     [Header("Co-op Camera Settings")]
     [SerializeField] private bool useCoopCamera = true;
     [SerializeField] private float cameraSmoothTime = 0.3f;
