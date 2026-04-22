@@ -215,6 +215,14 @@ public class NetworkManager : MonoBehaviour
                 OnExplosionReceived?.Invoke(explosionMsg.livesLeft, explosionMsg.loserId);
                 break;
 
+            case "player_joined":
+                WsPlayerJoinedMessage joinedMsg = JsonUtility.FromJson<WsPlayerJoinedMessage>(json);
+                if (CurrentGameData != null) {
+                    CurrentGameData.player2 = int.Parse(joinedMsg.userId);
+                    Debug.Log($"[NetworkManager] ¡Un nou jugador s'ha unit! ID: {joinedMsg.userId}. Partida PLENA.");
+                }
+                break;
+
             case "game_over":
                 WsGameOverMessage gameOverMsg = JsonUtility.FromJson<WsGameOverMessage>(json);
                 OnGameOverReceived?.Invoke(gameOverMsg);
@@ -362,6 +370,12 @@ public class WsExplosionMessage : WsBaseMessage
 {
     public int livesLeft;
     public string loserId;
+}
+
+[Serializable]
+public class WsPlayerJoinedMessage : WsBaseMessage
+{
+    public string userId;
 }
 
 [Serializable]

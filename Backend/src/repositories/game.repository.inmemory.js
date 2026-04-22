@@ -10,10 +10,15 @@ class GameRepositoryInMemory extends GameRepositoryInterface {
   }
 
   async findPendingGame() {
-    const partidaPendent = this._partides.find(
-      (p) => p.status === 'pending' && p.mode === 'vs_player'
-    );
-    return partidaPendent || null;
+    return this._partides.find(p => p.status === 'pending') || null;
+  }
+
+  async listPending() {
+    return this._partides.filter(p => p.status === 'pending');
+  }
+
+  async findById(id) {
+    return this._partides.find(p => p.id === parseInt(id)) || null;
   }
 
   async createGame(game) {

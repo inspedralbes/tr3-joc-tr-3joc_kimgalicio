@@ -62,6 +62,9 @@ CREATE TABLE IF NOT EXISTS Games (
   -- Guanyador de la partida (null fins que la partida acabi).
   winner_id   INT          NULL,
 
+  -- Vides restants del guanyador al finalitzar la partida.
+  winner_hearts INT        NOT NULL DEFAULT 0,
+
   -- Restriccions de clau forana per garantir la integritat referencial.
   PRIMARY KEY (id),
   CONSTRAINT fk_games_player1 FOREIGN KEY (player1_id) REFERENCES Users(id),

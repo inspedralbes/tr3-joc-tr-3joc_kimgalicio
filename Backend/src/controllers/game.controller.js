@@ -11,15 +11,15 @@ class GameController {
 
   async join(req, res) {
     try {
-      const { userId, mode } = req.body;
+      const { userId, mode, gameId } = req.body;
 
-      if (!userId || !mode) {
+      if (!userId || (!mode && !gameId)) {
         return res.status(400).json({
-          error: 'Els camps "userId" i "mode" són obligatoris al cos de la petició.',
+          error: 'Els camps "userId" i ("mode" o "gameId") són obligatoris.',
         });
       }
 
-      const partida = await this._gameService.joinGame(userId, mode);
+      const partida = await this._gameService.joinGame(userId, mode, gameId);
 
       const esNova = partida.player2 === null || partida.mode === 'vs_bot';
       const codiEstat = esNova ? 201 : 200;
@@ -33,11 +33,21 @@ class GameController {
 
     } catch (error) {
 
-      if (error.message.includes('mode') || error.message.includes('userId')) {
+      if (error.message.includes('mode') || error.message.includes('userId') || error.message.includes('ID')) {
         return res.status(400).json({ error: error.message });
       }
 
       console.error('[GameController.join] Error inesperat:', error);
+      return res.status(500).json({ error: 'Error intern del servidor.' });
+    }
+  }
+
+  async listRooms(req, res) {
+    try {
+      const rooms = await this._gameService.getRooms();
+      return res.status(200).json(rooms);
+    } catch (error) {
+      console.error('[GameController.listRooms] Error:', error);
       return res.status(500).json({ error: 'Error intern del servidor.' });
     }
   }
@@ -52,7 +62,7 @@ class GameController {
         });
       }
 
-      const partida = await this._gameService.finishGame(gameId, winnerId);
+      const partida = await this._gameService.finishGame(gameId, winnerId, winnerHearts);
 
       if (this._broadcastGameOver) {
         const loserId = (partida.player1 === winnerId) ? partida.player2 : partida.player1;

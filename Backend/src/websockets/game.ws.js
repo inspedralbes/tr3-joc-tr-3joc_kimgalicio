@@ -89,6 +89,12 @@ function inicialitzarWebSocket(servidorHttp) {
           userId:     userIdActual,
           numJugadors,
         });
+
+        broadcast(gameIdActual, userIdActual, {
+          action: 'player_joined',
+          userId: userIdActual,
+        });
+
         return;
       }
 
