@@ -29,10 +29,32 @@ public class GameManager : MonoBehaviour
     private Camera _mainCamera;
     private Vector3 _cameraVelocity;
     private bool _isTransitioning = false;
+    private bool _waitingForPlayers = false;
 
     private void Awake()
     {
         _mainCamera = Camera.main;
+    }
+
+    private void OnEnable()
+    {
+        NetworkManager.OnPlayerJoined += HandlePlayerJoined;
+    }
+
+    private void OnDisable()
+    {
+        NetworkManager.OnPlayerJoined -= HandlePlayerJoined;
+    }
+
+    private void HandlePlayerJoined(string userId)
+    {
+        if (_waitingForPlayers)
+        {
+            Debug.Log("[GameManager] Oponent connectat. Iniciant ronda...");
+            _waitingForPlayers = false;
+            if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(false);
+            StartCoroutine(RoundResetCoroutine());
+        }
     }
 
     void Start()
@@ -87,12 +109,32 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        StartRound();
+
+        if (GameState.SelectedMode == GameModeType.VsPlayer && 
+            NetworkManager.Instance != null && 
+            NetworkManager.Instance.CurrentGameData != null && 
+            !NetworkManager.Instance.CurrentGameData.player2.HasValue)
+        {
+            Debug.Log("[GameManager] Mode Online detectat. Esperant oponent...");
+            _waitingForPlayers = true;
+            if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(true);
+            
+            // Posem al jugador 1 al seu lloc mentre espera per evitar que caigui al buit
+            for (int i = 0; i < Entities.Length; i++)
+            {
+                if (Entities[i] != null && Entities[i].activeInHierarchy) ResetEntity(Entities[i], i);
+            }
+        }
+        else
+        {
+            StartRound();
+        }
     }
 
     void StartRound()
     {
         _isTransitioning = false;
+        _waitingForPlayers = false;
         GameState.GameTimer = GameState.InitialTimer;
         GameState.Spectators.Clear();
 
@@ -107,7 +149,10 @@ public class GameManager : MonoBehaviour
     private IEnumerator DelayedInitialBombAssignment()
     {
         yield return new WaitForEndOfFrame();
-        AssignStartingBomb();
+        if (!_waitingForPlayers)
+        {
+            AssignStartingBomb();
+        }
     }
 
     void Update()
@@ -118,7 +163,7 @@ public class GameManager : MonoBehaviour
             InitializeGame();
             return;
         }
-        if (GameState.GameOver || _isTransitioning) return;
+        if (GameState.GameOver || _isTransitioning || _waitingForPlayers) return;
         GameState.UpdateTimer(Time.deltaTime);
     }
 
@@ -161,6 +206,13 @@ public class GameManager : MonoBehaviour
         var controller = deadEntity.GetComponent<PlayerModeController2D>();
         if (controller != null) controller.TriggerDamage();
         GameState.SubtractLife(deadEntity.name);
+
+        // --- MULTIPLAYER SYNC ---
+        if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
+        {
+            NetworkManager.Instance.SendExplosion(GameState.GetLives(deadEntity.name), deadEntity.name);
+        }
+
         if (GameState.GetLives(deadEntity.name) <= 0)
         {
             EndGame(deadEntity.name);

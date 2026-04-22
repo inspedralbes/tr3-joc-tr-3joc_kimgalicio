@@ -33,7 +33,14 @@ class GameController {
         partida,
       });
 
-    } catch (error) { ... }
+    } catch (error) {
+      if (error.message.includes('mode') || error.message.includes('userId') || error.message.includes('ID') || error.message.includes('pendent')) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      console.error('[GameController.join] Error inesperat:', error);
+      return res.status(500).json({ error: 'Error intern del servidor.' });
+    }
   }
 
   async listRooms(req, res) {
@@ -42,7 +49,10 @@ class GameController {
       const rooms = await this._gameService.getRooms();
       console.log(`[GameController.listRooms] S'han trobat ${rooms.length} sales pendents.`);
       return res.status(200).json(rooms);
-    } catch (error) { ... }
+    } catch (error) {
+      console.error('[GameController.listRooms] Error:', error);
+      return res.status(500).json({ error: 'Error intern del servidor.' });
+    }
   }
 
   async finish(req, res) {
@@ -74,7 +84,18 @@ class GameController {
         partida,
       });
 
-    } catch (error) { ... }
+    } catch (error) {
+      if (error.message.includes('No s\'ha trobat')) {
+        return res.status(404).json({ error: error.message });
+      }
+
+      if (error.message.includes('gameId') || error.message.includes('winnerId')) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      console.error('[GameController.finish] Error inesperat:', error);
+      return res.status(500).json({ error: 'Error intern del servidor.' });
+    }
   }
 }
 

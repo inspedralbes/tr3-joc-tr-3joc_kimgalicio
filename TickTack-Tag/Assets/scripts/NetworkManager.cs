@@ -27,6 +27,7 @@ public class NetworkManager : MonoBehaviour
     public static event Action<string> OnBombTransferReceived;
     public static event Action<int, string> OnExplosionReceived;
     public static event Action<WsGameOverMessage> OnGameOverReceived;
+    public static event Action<string> OnPlayerJoined;
     public static event Action OnConnected;
 
     private void Awake()
@@ -193,7 +194,7 @@ public class NetworkManager : MonoBehaviour
 
     private void HandleWsMessage(string json)
     {
-
+        Debug.Log($"[NetworkManager] Missatge rebut: {json}");
         WsBaseMessage baseMsg = JsonUtility.FromJson<WsBaseMessage>(json);
 
         switch (baseMsg.action)
@@ -220,7 +221,16 @@ public class NetworkManager : MonoBehaviour
                 if (CurrentGameData != null) {
                     CurrentGameData.player2 = int.Parse(joinedMsg.userId);
                     Debug.Log($"[NetworkManager] ¡Un nou jugador s'ha unit! ID: {joinedMsg.userId}. Partida PLENA.");
+                    OnPlayerJoined?.Invoke(joinedMsg.userId);
                 }
+                break;
+
+            case "joined":
+                Debug.Log("[NetworkManager] Confirmació de unió rebuda del servidor.");
+                break;
+
+            case "error":
+                Debug.LogError($"[NetworkManager] Error rebut del servidor: {json}");
                 break;
 
             case "game_over":
@@ -313,6 +323,17 @@ public class LoginRequest
 public class LoginResponse
 {
     public int userId;
+    public string missatge;
+    public UserDTO usuari;
+}
+
+[Serializable]
+public class UserDTO
+{
+    public int id;
+    public string nickname;
+    public int wins;
+    public int losses;
 }
 
 [Serializable]

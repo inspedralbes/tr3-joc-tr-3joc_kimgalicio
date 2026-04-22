@@ -8,6 +8,9 @@ function inicialitzarWebSocket(servidorHttp) {
 
   function enviar(socket, dades) {
     if (socket.readyState === socket.OPEN) {
+      if (dades.action === 'error') {
+        console.log(`[WS] Enviant ERROR al client: ${dades.missatge}`);
+      }
       socket.send(JSON.stringify(dades));
     }
   }
@@ -104,12 +107,16 @@ function inicialitzarWebSocket(servidorHttp) {
       }
 
       if (action === 'move') {
-        const { x, y } = dades;
-        if (x === undefined || y === undefined) {
-          enviar(ws, { action: 'error', missatge: 'L\'acció "move" requereix "x" i "y".' });
+        const { position } = dades;
+        if (!position || position.x === undefined || position.y === undefined) {
+          enviar(ws, { action: 'error', missatge: 'L\'acció "move" requereix un objecte "position" amb "x" i "y".' });
           return;
         }
-        broadcast(gameIdActual, userIdActual, { action: 'move', userId: userIdActual, x, y });
+        broadcast(gameIdActual, userIdActual, { 
+          action: 'move', 
+          userId: userIdActual, 
+          position: { x: position.x, y: position.y } 
+        });
         return;
       }
 
@@ -135,7 +142,7 @@ function inicialitzarWebSocket(servidorHttp) {
         return;
       }
 
-      enviar(ws, { action: 'error', missatge: `Acció desconeguda: "${action}".` });
+      enviar(ws, { action: 'error', missatge: `Acció desconeguda: "${action}".`, originalMessage: missatgeCru.toString() });
     });
 
     ws.on('close', () => {

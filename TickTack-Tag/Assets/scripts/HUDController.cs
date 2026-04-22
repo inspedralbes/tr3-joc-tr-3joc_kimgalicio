@@ -98,6 +98,25 @@ public class HUDController : MonoBehaviour
         label.text = gameStateSO.GetLives(entityName).ToString();
     }
 
+    public void SetWaitingForOpponent(bool isWaiting)
+    {
+        if (countdownOverlay == null || lblCountdown == null) InitializeReferences();
+        
+        if (isWaiting)
+        {
+            countdownOverlay.style.display = DisplayStyle.Flex;
+            countdownOverlay.visible = true;
+            lblCountdown.text = "Esperant oponent...";
+            lblCountdown.style.fontSize = 40;
+            lblCountdown.style.color = new StyleColor(Color.white);
+        }
+        else
+        {
+            countdownOverlay.style.display = DisplayStyle.None;
+            countdownOverlay.visible = false;
+        }
+    }
+
     public void ShowCountdown(System.Action onComplete)
     {
         if (countdownOverlay == null || lblCountdown == null) InitializeReferences();
