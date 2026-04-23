@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
     public static event Action<int, int> OnLocalGameOver;
     public GameStateSO GameState;
     public GameObject[] Entities;
@@ -26,31 +27,46 @@ public class GameManager : MonoBehaviour
     private Camera _mainCamera;
     private Vector3 _cameraVelocity;
     private bool _isTransitioning = false;
+    public bool IsTransitioning => _isTransitioning;
     private bool _waitingForPlayers = false;
+    public bool IsWaitingForPlayers => _waitingForPlayers;
 
     private void Awake()
     {
+        if (Instance == null) Instance = this;
         _mainCamera = Camera.main;
     }
 
     private void OnEnable()
     {
-        NetworkManager.OnPlayerJoined += HandlePlayerJoined;
+        NetworkManager.OnGameReady += HandleGameReady;
+        NetworkManager.OnOpponentDisconnected += HandleOpponentDisconnected;
     }
 
     private void OnDisable()
     {
-        NetworkManager.OnPlayerJoined -= HandlePlayerJoined;
+        NetworkManager.OnGameReady -= HandleGameReady;
+        NetworkManager.OnOpponentDisconnected -= HandleOpponentDisconnected;
     }
 
-    private void HandlePlayerJoined(string userId)
+    private void HandleGameReady()
     {
         if (_waitingForPlayers)
         {
-            Debug.Log("[GameManager] Oponent connectat. Iniciant ronda...");
+            Debug.Log("[GameManager] Partida a punt (Sincronitzat). Iniciant ronda...");
             _waitingForPlayers = false;
             if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(false);
             StartCoroutine(RoundResetCoroutine());
+        }
+    }
+
+    private void HandleOpponentDisconnected()
+    {
+        Debug.LogWarning("[GameManager] L'oponent ha abandonat la partida.");
+        // Podríem tornar al menú o mostrar un missatge
+        if (HUDController.Instance != null) 
+        {
+            HUDController.Instance.SetWaitingForOpponent(true); // O un altre mètode per mostrar l'estat
         }
     }
 
@@ -139,14 +155,13 @@ public class GameManager : MonoBehaviour
 
         if (GameState.SelectedMode == GameModeType.VsPlayer && 
             NetworkManager.Instance != null && 
-            NetworkManager.Instance.CurrentGameData != null && 
-            !NetworkManager.Instance.CurrentGameData.player2.HasValue)
+            NetworkManager.Instance.CurrentGameData != null)
         {
-            Debug.Log("[GameManager] Mode Online detectat. Esperant oponent...");
+            Debug.Log("[GameManager] Mode Online detectat. Esperant sincronització de jugadors...");
             _waitingForPlayers = true;
             if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(true);
             
-            // Posem al jugador 1 al seu lloc mentre espera per evitar que caigui al buit
+            // Posem als jugadors als seus llocs inicials mentre esperen
             for (int i = 0; i < Entities.Length; i++)
             {
                 if (Entities[i] != null && Entities[i].activeInHierarchy) ResetEntity(Entities[i], i);

@@ -53,7 +53,8 @@ public class PlayerModeController2D : MonoBehaviour
 
     void Update()
     {
-        if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name)))
+        if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name) || 
+            (GameManager.Instance != null && (GameManager.Instance.IsWaitingForPlayers || GameManager.Instance.IsTransitioning))))
         {
             input = Vector2.zero;
             jumpRequested = false;

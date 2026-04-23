@@ -34,7 +34,9 @@ public class NetworkManager : MonoBehaviour
     public static event Action<string> OnBombTransferReceived;
     public static event Action<int, string> OnExplosionReceived;
     public static event Action<WsGameOverMessage> OnGameOverReceived;
-    public static event Action<string> OnPlayerJoined;
+    public static event Action OnPlayerJoinedSelf;
+    public static event Action OnOpponentDisconnected;
+    public static event Action OnGameReady;
     public static event Action OnConnected;
 
     private void Awake()
@@ -240,8 +242,17 @@ public class NetworkManager : MonoBehaviour
                 if (CurrentGameData != null) {
                     CurrentGameData.player2 = int.Parse(joinedMsg.userId);
                     Debug.Log($"[NetworkManager] ¡Un nou jugador s'ha unit! ID: {joinedMsg.userId}. Partida PLENA.");
-                    OnPlayerJoined?.Invoke(joinedMsg.userId);
                 }
+                break;
+
+            case "game_ready":
+                Debug.Log("[NetworkManager] La partida està a punt (2 jugadors).");
+                OnGameReady?.Invoke();
+                break;
+
+            case "opponent_disconnected":
+                Debug.Log("[NetworkManager] L'oponent s'ha desconnectat.");
+                OnOpponentDisconnected?.Invoke();
                 break;
 
             case "joined":

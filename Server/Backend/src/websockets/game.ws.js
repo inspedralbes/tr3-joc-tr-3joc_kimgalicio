@@ -93,10 +93,13 @@ function inicialitzarWebSocket(servidorHttp) {
           numJugadors,
         });
 
-        broadcast(gameIdActual, userIdActual, {
-          action: 'player_joined',
-          userId: userIdActual,
-        });
+        if (numJugadors === 2) {
+          console.log(`[WS] Partida ${gameIdActual} PLENA. Enviant "game_ready" a tots els jugadors.`);
+          broadcast(gameIdActual, '', {
+            action: 'game_ready',
+            gameId: gameIdActual
+          });
+        }
 
         return;
       }
