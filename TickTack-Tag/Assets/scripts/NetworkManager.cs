@@ -43,6 +43,15 @@ public class NetworkManager : MonoBehaviour
         httpUrl = useProduction ? prodHttpUrl : localHttpUrl;
         wsUrl = useProduction ? prodWsUrl : localWsUrl;
 
+        // Auto-upgrade to HTTPS/WSS if we are on an HTTPS page (Mixed Content prevention)
+#if UNITY_WEBGL && !UNITY_EDITOR
+        if (Application.absoluteURL.StartsWith("https://"))
+        {
+            if (httpUrl.StartsWith("http://")) httpUrl = httpUrl.Replace("http://", "https://");
+            if (wsUrl.StartsWith("ws://")) wsUrl = wsUrl.Replace("ws://", "wss://");
+        }
+#endif
+
         if (Instance == null)
         {
             Instance = this;

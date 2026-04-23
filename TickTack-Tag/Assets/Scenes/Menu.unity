@@ -164,8 +164,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useProduction: 1
-  prodHttpUrl: http://ticktack-tag.dam.inspedralbes.cat
-  prodWsUrl: ws://ticktack-tag.dam.inspedralbes.cat
+  prodHttpUrl: https://ticktack-tag.dam.inspedralbes.cat
+  prodWsUrl: wss://ticktack-tag.dam.inspedralbes.cat
   localHttpUrl: http://localhost:3000
   localWsUrl: ws://localhost:3000
 --- !u!1 &499633112
