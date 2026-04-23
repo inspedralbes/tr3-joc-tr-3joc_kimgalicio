@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEngine.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="main-container" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: column; justify-content: flex-start; padding-top: 1.5%; padding-left: 5%; padding-right: 5%; height: 100%; width: 100%;">
+    <ui:VisualElement name="main-container" picking-mode="Ignore" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: column; justify-content: flex-start; padding-top: 1.5%; padding-left: 5%; padding-right: 5%; height: 100%; width: 100%;">
         <ui:VisualElement name="top-row" style="flex-direction: row; justify-content: space-between; align-items: flex-start; width: 100%;">
             <!-- Jugador 1 -->
             <ui:VisualElement name="player1-stats" style="flex-direction: row; align-items: center; margin-top: 4px;">

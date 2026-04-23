@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(UIDocument))]
 public class HUDController : MonoBehaviour
@@ -19,6 +20,7 @@ public class HUDController : MonoBehaviour
 
     private string playerEntityName = "";
     private string botEntityName = "";
+    private UIDocument _uiDocument;
 
     private void Awake()
     {
@@ -30,14 +32,23 @@ public class HUDController : MonoBehaviour
     {
         InitializeReferences();
         StartCoroutine(FindEntityNames());
+
+        if (SceneManager.GetActiveScene().name == "Menu")
+        {
+            HideHUD();
+        }
+        else
+        {
+            ShowHUD();
+        }
     }
 
     private void InitializeReferences()
     {
-        var uiDocument = GetComponent<UIDocument>();
-        if (uiDocument == null || uiDocument.rootVisualElement == null) return;
+        if (_uiDocument == null) _uiDocument = GetComponent<UIDocument>();
+        if (_uiDocument == null || _uiDocument.rootVisualElement == null) return;
 
-        var root = uiDocument.rootVisualElement;
+        var root = _uiDocument.rootVisualElement;
         
         lblTimer = root.Q<Label>("lbl-timer");
         lblLivesP1 = root.Q<Label>("lbl-lives-p1");
@@ -158,5 +169,17 @@ public class HUDController : MonoBehaviour
         countdownOverlay.visible = false;
 
         onComplete?.Invoke();
+    }
+
+    public void ShowHUD()
+    {
+        if (_uiDocument == null) _uiDocument = GetComponent<UIDocument>();
+        if (_uiDocument != null) _uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
+    }
+
+    public void HideHUD()
+    {
+        if (_uiDocument == null) _uiDocument = GetComponent<UIDocument>();
+        if (_uiDocument != null) _uiDocument.rootVisualElement.style.display = DisplayStyle.None;
     }
 }

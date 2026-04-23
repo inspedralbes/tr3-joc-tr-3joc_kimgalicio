@@ -57,6 +57,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         if (GameState == null) return;
+        if (HUDController.Instance != null) HUDController.Instance.ShowHUD();
         InitializeGame();
     }
 
