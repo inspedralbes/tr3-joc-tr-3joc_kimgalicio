@@ -12,8 +12,8 @@ public class NetworkManager : MonoBehaviour
 
     [Header("Configuració de Xarxa")]
     [SerializeField] private bool useProduction = true;
-    [SerializeField] private string prodHttpUrl = "http://ticktack-tag.dam.inspedralbes.cat";
-    [SerializeField] private string prodWsUrl = "ws://ticktack-tag.dam.inspedralbes.cat";
+    [SerializeField] private string prodHttpUrl = "https://ticktack-tag.dam.inspedralbes.cat";
+    [SerializeField] private string prodWsUrl = "wss://ticktack-tag.dam.inspedralbes.cat";
     [SerializeField] private string localHttpUrl = "http://localhost:3000";
     [SerializeField] private string localWsUrl = "ws://localhost:3000";
 
