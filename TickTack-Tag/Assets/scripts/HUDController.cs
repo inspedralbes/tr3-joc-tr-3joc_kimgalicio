@@ -18,8 +18,8 @@ public class HUDController : MonoBehaviour
     private VisualElement countdownOverlay;
     private Label lblCountdown;
 
-    private string playerEntityName = "";
-    private string botEntityName = "";
+    private string entity1Name = "";
+    private string entity2Name = "";
     private UIDocument _uiDocument;
 
     private void Awake()
@@ -69,11 +69,17 @@ public class HUDController : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         if (gameStateSO == null || gameStateSO.EntityLives == null) yield break;
 
+        List<string> activeKeys = new List<string>();
         foreach (var key in gameStateSO.EntityLives.Keys)
         {
-            if (key.ToLower().Contains("bot")) botEntityName = key;
-            else playerEntityName = key;
+            // Només ens interessen les entitats que estan actives (tenen vides > 0 o estan inicialitzades)
+            activeKeys.Add(key);
         }
+
+        if (activeKeys.Count >= 1) entity1Name = activeKeys[0];
+        if (activeKeys.Count >= 2) entity2Name = activeKeys[1];
+        
+        Debug.Log($"[HUD] Entitats detectades: E1={entity1Name}, E2={entity2Name}");
     }
 
     private void Update()
@@ -99,8 +105,8 @@ public class HUDController : MonoBehaviour
 
     private void UpdateLivesDisplay()
     {
-        if (playerEntityName != "") UpdateLifeLabel(playerEntityName, lblLivesP1);
-        if (botEntityName != "") UpdateLifeLabel(botEntityName, lblLivesP2);
+        if (entity1Name != "") UpdateLifeLabel(entity1Name, lblLivesP1);
+        if (entity2Name != "") UpdateLifeLabel(entity2Name, lblLivesP2);
     }
 
     private void UpdateLifeLabel(string entityName, Label label)

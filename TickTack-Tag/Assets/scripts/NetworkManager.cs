@@ -27,6 +27,7 @@ public class NetworkManager : MonoBehaviour
     public bool IsBotGame => GameMode == GameModeType.VsBot;
     public bool IsPlayer1 => CurrentGameData != null && UserId == CurrentGameData.player1.ToString();
     public PartidaDTO CurrentGameData { get; private set; }
+    public bool IsGameReady { get; private set; }
 
     private WebSocket _websocket;
 
@@ -104,6 +105,7 @@ public class NetworkManager : MonoBehaviour
 
     public void JoinGame(GameModeType mode, Action<bool> callback = null)
     {
+        IsGameReady = false; // Reset ready state when joining a new game
         GameMode = mode;
         string modeStr = (mode == GameModeType.VsBot) ? "vs_bot" : "vs_player";
         StartCoroutine(PostJoin(modeStr, callback));
@@ -241,12 +243,13 @@ public class NetworkManager : MonoBehaviour
                 WsPlayerJoinedMessage joinedMsg = JsonUtility.FromJson<WsPlayerJoinedMessage>(json);
                 if (CurrentGameData != null) {
                     CurrentGameData.player2 = int.Parse(joinedMsg.userId);
-                    Debug.Log($"[NetworkManager] ¡Un nou jugador s'ha unit! ID: {joinedMsg.userId}. Partida PLENA.");
+                    Debug.Log($"[NetworkManager] ¡Un nou jugador s'ha unit! ID: {joinedMsg.userId}. Sincronitzant...");
                 }
                 break;
 
             case "game_ready":
                 Debug.Log("[NetworkManager] La partida està a punt (2 jugadors).");
+                IsGameReady = true;
                 OnGameReady?.Invoke();
                 break;
 

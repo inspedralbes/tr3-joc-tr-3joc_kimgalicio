@@ -158,8 +158,19 @@ public class GameManager : MonoBehaviour
             NetworkManager.Instance.CurrentGameData != null)
         {
             Debug.Log("[GameManager] Mode Online detectat. Esperant sincronització de jugadors...");
-            _waitingForPlayers = true;
-            if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(true);
+            
+            if (NetworkManager.Instance.IsGameReady)
+            {
+                Debug.Log("[GameManager] La partida ja estava a punt. Iniciant immediatament.");
+                _waitingForPlayers = false;
+                if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(false);
+                StartCoroutine(RoundResetCoroutine());
+            }
+            else
+            {
+                _waitingForPlayers = true;
+                if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(true);
+            }
             
             // Posem als jugadors als seus llocs inicials mentre esperen
             for (int i = 0; i < Entities.Length; i++)
