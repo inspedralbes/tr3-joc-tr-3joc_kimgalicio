@@ -48,6 +48,13 @@ public class PlayerModeController2D : MonoBehaviour
         defaultGravity = (mode == GameMode.TopDown) ? 0f : 1f;
         ApplyModeSettings();
 
+        // Si és una entitat remota, la posem com a Kinematic per evitar conflictes amb la xarxa
+        if (useAiInput)
+        {
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.useFullKinematicContacts = true;
+        }
+
         if (GameState != null) GameState.InitializeEntity(gameObject.name);
     }
 
@@ -58,7 +65,7 @@ public class PlayerModeController2D : MonoBehaviour
         {
             input = Vector2.zero;
             jumpRequested = false;
-            rb.linearVelocity = Vector2.zero;
+            if (rb.bodyType != RigidbodyType2D.Kinematic) rb.linearVelocity = Vector2.zero;
             return;
         }
 
@@ -88,6 +95,7 @@ public class PlayerModeController2D : MonoBehaviour
         }
         else if (!IsGrounded())
         {
+            // Per entitats remotes (kinematic), mirem la velocitat calculada o l'estat previ
             if (rb.linearVelocity.y > 0.1f)
                 newState = ANIM_JUMP;
             else if (rb.linearVelocity.y < -0.1f)
@@ -129,6 +137,9 @@ public class PlayerModeController2D : MonoBehaviour
     private void FixedUpdate()
     {
         if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name))) return;
+
+        // Si és AI (remot), el moviment el gestiona NetworkPlayerSync via transform o MovePosition
+        if (useAiInput) return;
 
         float effectiveSpeed = (mode == GameMode.TopDown ? topDownSpeed : platformerSpeed) * _currentSpeedMultiplier;
 

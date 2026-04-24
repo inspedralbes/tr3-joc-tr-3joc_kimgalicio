@@ -41,6 +41,13 @@ public class GameManager : MonoBehaviour
     {
         NetworkManager.OnGameReady += HandleGameReady;
         NetworkManager.OnOpponentDisconnected += HandleOpponentDisconnected;
+
+        // Si ja està a punt quan ens activem, processem-ho
+        if (NetworkManager.Instance != null && NetworkManager.Instance.IsGameReady)
+        {
+            Debug.Log("[GameManager] La partida ja està a punt al activar el Manager.");
+            HandleGameReady();
+        }
     }
 
     private void OnDisable()
@@ -131,7 +138,7 @@ public class GameManager : MonoBehaviour
 
                     // Si sóc el 1 i l'entitat és la 1, NO és AI. Si sóc el 1 i l'entitat és la 2, SÍ és AI.
                     controller.useAiInput = (sócJugador1 != aquestaEntitatÉsJugador1);
-                    Debug.Log($"[GameManager] {entity.name} configurat com a {(controller.useAiInput ? "REMOTO (AI Input)" : "LOCAL")}");
+                    Debug.Log($"[GameManager] {entity.name} (Entitat {i}) configurat com a {(controller.useAiInput ? "REMOT" : "LOCAL")}. IsPlayer1: {sócJugador1}");
                 }
                 GameState.InitializeEntity(entity.name);
             }
@@ -157,7 +164,8 @@ public class GameManager : MonoBehaviour
             NetworkManager.Instance != null && 
             NetworkManager.Instance.CurrentGameData != null)
         {
-            Debug.Log("[GameManager] Mode Online detectat. Esperant sincronització de jugadors...");
+            var data = NetworkManager.Instance.CurrentGameData;
+            Debug.Log($"[GameManager] Mode Online. GameId: {data.id}, P1: {data.player1}, P2: {data.player2}. IsReady: {NetworkManager.Instance.IsGameReady}");
             
             if (NetworkManager.Instance.IsGameReady)
             {

@@ -217,75 +217,89 @@ public class NetworkManager : MonoBehaviour
 
     private void HandleWsMessage(string json)
     {
-        Debug.Log($"[NetworkManager] Missatge rebut: {json}");
+        Debug.Log($"[NetworkManager] Missatge WS rebut: {json}");
         WsBaseMessage baseMsg = JsonUtility.FromJson<WsBaseMessage>(json);
+
+        if (baseMsg == null || string.IsNullOrEmpty(baseMsg.action)) {
+            Debug.LogWarning("[NetworkManager] Missatge rebut buit o sense acció.");
+            return;
+        }
 
         switch (baseMsg.action)
         {
             case "move":
                 WsMoveMessage moveMsg = JsonUtility.FromJson<WsMoveMessage>(json);
-                if (moveMsg.userId != UserId) {
+                if (moveMsg != null && moveMsg.userId != UserId) {
                     OnMoveReceived?.Invoke(moveMsg.userId, new Vector2(moveMsg.position.x, moveMsg.position.y));
                 }
                 break;
 
             case "bomb_transfer":
                 WsBombTransferMessage bombMsg = JsonUtility.FromJson<WsBombTransferMessage>(json);
-                OnBombTransferReceived?.Invoke(bombMsg.newOwnerId);
+                if (bombMsg != null) OnBombTransferReceived?.Invoke(bombMsg.newOwnerId);
                 break;
 
             case "explosion":
                 WsExplosionMessage explosionMsg = JsonUtility.FromJson<WsExplosionMessage>(json);
-                OnExplosionReceived?.Invoke(explosionMsg.livesLeft, explosionMsg.loserId);
+                if (explosionMsg != null) OnExplosionReceived?.Invoke(explosionMsg.livesLeft, explosionMsg.loserId);
                 break;
 
             case "player_joined":
                 WsPlayerJoinedMessage joinedMsg = JsonUtility.FromJson<WsPlayerJoinedMessage>(json);
-                if (CurrentGameData != null) {
-                    CurrentGameData.player2 = int.Parse(joinedMsg.userId);
-                    Debug.Log($"[NetworkManager] ¡Un nou jugador s'ha unit! ID: {joinedMsg.userId}. Sincronitzant...");
+                if (joinedMsg != null && CurrentGameData != null) {
+                    if (int.TryParse(joinedMsg.userId, out int otherId)) {
+                        CurrentGameData.player2 = otherId;
+                        Debug.Log($"[NetworkManager] S'ha unit un altre jugador! ID: {otherId}.");
+                    }
                 }
                 break;
 
             case "game_ready":
-                Debug.Log("[NetworkManager] La partida està a punt (2 jugadors).");
+                Debug.Log("[NetworkManager] LA PARTIDA ESTÀ A PUNT (2 JUGADORS)!");
                 IsGameReady = true;
                 OnGameReady?.Invoke();
                 break;
 
             case "opponent_disconnected":
-                Debug.Log("[NetworkManager] L'oponent s'ha desconnectat.");
+                Debug.LogWarning("[NetworkManager] L'oponent s'ha desconnectat del servidor.");
                 OnOpponentDisconnected?.Invoke();
                 break;
 
             case "joined":
-                Debug.Log("[NetworkManager] Confirmació de unió rebuda del servidor.");
+                Debug.Log("[NetworkManager] Servidor confirma que el nostre 'join' ha estat registrat.");
                 break;
 
             case "error":
-                Debug.LogError($"[NetworkManager] Error rebut del servidor: {json}");
+                Debug.LogError($"[NetworkManager] ERROR rebut del servidor WS: {json}");
                 break;
 
             case "game_over":
                 WsGameOverMessage gameOverMsg = JsonUtility.FromJson<WsGameOverMessage>(json);
-                OnGameOverReceived?.Invoke(gameOverMsg);
+                if (gameOverMsg != null) OnGameOverReceived?.Invoke(gameOverMsg);
                 break;
 
             default:
-                Debug.LogWarning($"[NetworkManager] Acció desconeguda rebuda: {baseMsg.action}");
+                Debug.LogWarning($"[NetworkManager] Acció desconeguda: {baseMsg.action}");
                 break;
         }
     }
 
     private async void SendJoinAction()
     {
+        if (string.IsNullOrEmpty(GameId) || string.IsNullOrEmpty(UserId)) {
+            Debug.LogError("[NetworkManager] No es pot enviar 'join' sense GameId o UserId.");
+            return;
+        }
+
         WsJoinAction join = new WsJoinAction
         {
             action = "join",
             gameId = GameId,
             userId = UserId
         };
-        await _websocket.SendText(JsonUtility.ToJson(join));
+        string json = JsonUtility.ToJson(join);
+        Debug.Log($"[NetworkManager] Enviant Join per WS: {json}");
+        await _websocket.SendText(json);
     }
 
     public async void SendMove(Vector2 position)
