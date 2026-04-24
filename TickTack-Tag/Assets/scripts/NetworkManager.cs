@@ -187,11 +187,12 @@ public class NetworkManager : MonoBehaviour
 
     public async void ConnectToGame()
     {
+        Debug.Log($"[NetworkManager] Connectant a: {wsUrl}");
         _websocket = new WebSocket(wsUrl);
 
         _websocket.OnOpen += () =>
         {
-            Debug.Log("[NetworkManager] Connexió WebSocket oberta.");
+            Debug.Log("[NetworkManager] Connexió WebSocket OBERTA.");
             SendJoinAction();
             OnConnected?.Invoke();
         };
@@ -203,7 +204,7 @@ public class NetworkManager : MonoBehaviour
 
         _websocket.OnClose += (e) =>
         {
-            Debug.Log("[NetworkManager] Connexió WebSocket tancada.");
+            Debug.Log("[NetworkManager] Connexió WebSocket TANCADA.");
         };
 
         _websocket.OnMessage += (bytes) =>

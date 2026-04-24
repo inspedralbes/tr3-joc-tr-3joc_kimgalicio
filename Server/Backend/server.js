@@ -44,7 +44,7 @@ const servidorHttp = app.listen(PORT, () => {
   console.log(`WebSocket (temps real) a:     ws://localhost:${PORT}`);
 });
 
-const { broadcastGameOver } = inicialitzarWebSocket(servidorHttp);
+const { broadcastGameOver } = inicialitzarWebSocket(servidorHttp, gameService);
 
 gameController.setBroadcastGameOver(broadcastGameOver);
 

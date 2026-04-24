@@ -1,6 +1,6 @@
 const { WebSocketServer } = require('ws');
 
-function inicialitzarWebSocket(servidorHttp) {
+function inicialitzarWebSocket(servidorHttp, gameService) {
 
   const wss = new WebSocketServer({ server: servidorHttp });
 
@@ -26,7 +26,7 @@ function inicialitzarWebSocket(servidorHttp) {
     });
   }
 
-  function gestionarDesconnexio(gameId, userId) {
+  async function gestionarDesconnexio(gameId, userId) {
     const jugadors = partides.get(gameId);
     if (!jugadors) return;
 
@@ -35,12 +35,18 @@ function inicialitzarWebSocket(servidorHttp) {
 
     if (jugadors.size > 0) {
       broadcast(gameId, '', { action: 'opponent_disconnected' });
-
     }
 
     if (jugadors.size === 0) {
       partides.delete(gameId);
-      console.log(`[WS] Partida ${gameId} tancada (sense jugadors).`);
+      console.log(`[WS] Partida ${gameId} buida. Netejant a la base de dades...`);
+      if (gameService) {
+        try {
+          await gameService.handleDisconnect(gameId);
+        } catch (err) {
+          console.error(`[WS] Error al netejar partida ${gameId}:`, err.message);
+        }
+      }
     }
   }
 

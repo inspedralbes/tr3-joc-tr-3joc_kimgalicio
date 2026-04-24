@@ -65,12 +65,16 @@ public class NetworkPlayerSync : MonoBehaviour
         int targetIndex = GetTargetIndex(userId);
         if (targetIndex != -1 && targetIndex < _gameManager.Entities.Length)
         {
-            // Només actualitzem si NO som nosaltres (redundant però segur)
+            // Només actualitzem si NO som nosaltres
             if (userId != NetworkManager.Instance.UserId)
             {
                 _targetPositions[targetIndex] = new Vector3(position.x, position.y, 0);
                 _hasTarget[targetIndex] = true;
             }
+        }
+        else
+        {
+            Debug.LogWarning($"[Sync] Moviment rebut per a UserId {userId} però no s'ha trobat cap entitat corresponent. Està el Jugador 2 sincronitzat?");
         }
     }
 

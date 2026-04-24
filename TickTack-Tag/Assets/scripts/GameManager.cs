@@ -114,6 +114,37 @@ public class GameManager : MonoBehaviour
                 maxZoom = 18f;
             }
         }
+
+        // --- LÒGICA DE CLONAT DINÀMIC PER A MULTIJUGADOR ---
+        if (GameState.SelectedMode == GameModeType.VsPlayer)
+        {
+            // Busquem si ja tenim dos jugadors (per si ja hem passat per aquí)
+            List<GameObject> activePlayers = new List<GameObject>();
+            GameObject originalPlayer = null;
+
+            foreach (var e in Entities)
+            {
+                if (e == null) continue;
+                if (!e.name.ToLower().Contains("bot") && !e.CompareTag("Bot"))
+                {
+                    activePlayers.Add(e);
+                    originalPlayer = e;
+                }
+            }
+
+            // Si només en tenim un, en creem un altre automàticament
+            if (activePlayers.Count == 1 && originalPlayer != null)
+            {
+                Debug.Log("[GameManager] Només s'ha trobat 1 Player. Creant clon per al Jugador 2...");
+                GameObject player2 = Instantiate(originalPlayer, originalPlayer.transform.parent);
+                player2.name = originalPlayer.name + "_Remote";
+                
+                // Actualitzem l'array d'Entities per incloure el nou jugador
+                List<GameObject> newEntities = new List<GameObject>(Entities);
+                newEntities.Add(player2);
+                Entities = newEntities.ToArray();
+            }
+        }
         
         for (int i = 0; i < Entities.Length; i++)
         {
@@ -132,13 +163,18 @@ public class GameManager : MonoBehaviour
                 var controller = entity.GetComponent<PlayerModeController2D>();
                 if (controller != null && NetworkManager.Instance != null)
                 {
-                    // Suposem: Entities[0] és el Jugador 1 (Creador), Entities[1] és el Jugador 2 (Convidat)
                     bool sócJugador1 = NetworkManager.Instance.IsPlayer1;
-                    bool aquestaEntitatÉsJugador1 = (i == 0);
+                    
+                    // L'entitat 0 sempre és el "primer human", l'entitat 1 el "segon human"
+                    // Si hi ha més entitats (clonades), les tractem segons el seu ordre
+                    int humanIndex = 0;
+                    for(int j=0; j<i; j++) {
+                        if (Entities[j] != null && !Entities[j].name.ToLower().Contains("bot")) humanIndex++;
+                    }
 
-                    // Si sóc el 1 i l'entitat és la 1, NO és AI. Si sóc el 1 i l'entitat és la 2, SÍ és AI.
-                    controller.useAiInput = (sócJugador1 != aquestaEntitatÉsJugador1);
-                    Debug.Log($"[GameManager] {entity.name} (Entitat {i}) configurat com a {(controller.useAiInput ? "REMOT" : "LOCAL")}. IsPlayer1: {sócJugador1}");
+                    controller.useAiInput = (sócJugador1 ? (humanIndex != 0) : (humanIndex != 1));
+                    
+                    Debug.Log($"[GameManager] {entity.name} (Índex {i}, Humà {humanIndex}) configurada. Local: {!controller.useAiInput}");
                 }
                 GameState.InitializeEntity(entity.name);
             }

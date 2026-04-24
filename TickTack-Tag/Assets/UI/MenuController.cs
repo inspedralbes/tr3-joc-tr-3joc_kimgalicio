@@ -73,11 +73,13 @@ public class MenuController : MonoBehaviour
                     if (joinSuccess)
                     {
                         Debug.Log("[MenuController] FASE 3: Partida trobada. Connectant per WebSocket...");
+                        
+                        // Escoltem l'esdeveniment de connexió abans de carregar l'escena
+                        NetworkManager.OnConnected += HandleWsConnected;
                         NetworkManager.Instance.ConnectToGame();
 
-                        Debug.Log("[MenuController] FASE 4: Connexió iniciada. Carregant escena de joc...");
-                        SceneManager.LoadScene("TickTack-Tag");
-
+                        // Timeout de seguretat: Si en 5 segons no connecta, reactivarem els botons
+                        Invoke(nameof(ConnectionTimeout), 5f);
                     }
                     else
                     {
@@ -92,6 +94,22 @@ public class MenuController : MonoBehaviour
                 SetButtonsInteractable(true);
             }
         });
+    }
+
+    private void HandleWsConnected()
+    {
+        NetworkManager.OnConnected -= HandleWsConnected;
+        CancelInvoke(nameof(ConnectionTimeout));
+        
+        Debug.Log("[MenuController] FASE 4: WebSocket Connectat. Carregant escena de joc...");
+        SceneManager.LoadScene("TickTack-Tag");
+    }
+
+    private void ConnectionTimeout()
+    {
+        NetworkManager.OnConnected -= HandleWsConnected;
+        Debug.LogError("[MenuController] TIMEOUT: No s'ha pogut connectar al WebSocket.");
+        SetButtonsInteractable(true);
     }
 
     private void SetButtonsInteractable(bool state)

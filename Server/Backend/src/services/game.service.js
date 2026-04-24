@@ -44,6 +44,10 @@ class GameService {
     const partidaPendent = await this._gameRepository.findPendingGame();
 
     if (partidaPendent) {
+      // Si la partida pendent és nostra, la retornem sense fer res més
+      if (partidaPendent.player1 === userId) {
+        return partidaPendent;
+      }
 
       const partidaActualitzada = await this._gameRepository.updateGame({
         id: partidaPendent.id,
@@ -61,6 +65,21 @@ class GameService {
       winnerId: null,
     });
     return novaPartidaPendent;
+  }
+
+  async handleDisconnect(gameId) {
+    if (!gameId) return;
+    const partida = await this._gameRepository.findById(gameId);
+    if (!partida) return;
+
+    // Si la partida encara estava pendent o jugant-se, la marquem com a finalitzada/cancel·lada
+    if (partida.status === 'pending' || partida.status === 'playing') {
+      console.log(`[GameService] Tancant partida ${gameId} per desconnexió.`);
+      await this._gameRepository.updateGame({
+        id: gameId,
+        status: 'finished' // O podríem usar un estat 'cancelled' si existís
+      });
+    }
   }
 
   async getRooms() {
