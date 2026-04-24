@@ -110,7 +110,7 @@ public class NetworkPlayerSync : MonoBehaviour
         if (NetworkManager.Instance == null || NetworkManager.Instance.CurrentGameData == null) return -1;
         var data = NetworkManager.Instance.CurrentGameData;
         if (userId == data.player1.ToString()) return 0;
-        if (data.player2.HasValue && userId == data.player2.Value.ToString()) return 1;
+        if (data.player2 != 0 && userId == data.player2.ToString()) return 1;
         return -1;
     }
 }

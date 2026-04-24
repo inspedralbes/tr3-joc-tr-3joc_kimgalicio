@@ -383,8 +383,8 @@ public class GameManager : MonoBehaviour
             if (Entities[i] == entity)
             {
                 if (i == 0) return NetworkManager.Instance.CurrentGameData.player1.ToString();
-                if (i == 1 && NetworkManager.Instance.CurrentGameData.player2.HasValue) 
-                    return NetworkManager.Instance.CurrentGameData.player2.Value.ToString();
+                if (i == 1 && NetworkManager.Instance.CurrentGameData.player2 != 0) 
+                    return NetworkManager.Instance.CurrentGameData.player2.ToString();
             }
         }
         return "";
@@ -398,7 +398,7 @@ public class GameManager : MonoBehaviour
         if (data == null) return null;
 
         if (userId == data.player1.ToString()) return Entities[0];
-        if (data.player2.HasValue && userId == data.player2.Value.ToString()) return Entities[1];
+        if (data.player2 != 0 && userId == data.player2.ToString()) return Entities[1];
 
         return null;
     }

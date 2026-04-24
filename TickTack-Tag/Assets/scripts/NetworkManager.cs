@@ -132,7 +132,7 @@ public class NetworkManager : MonoBehaviour
                 CurrentGameData = response.partida;
                 GameId = CurrentGameData.id.ToString();
 
-                string opponentInfo = IsBotGame ? "un BOT" : (CurrentGameData.player2.HasValue ? "un Jugador" : "esperant Jugador");
+                string opponentInfo = IsBotGame ? "un BOT" : (CurrentGameData.player2 != 0 ? "un Jugador" : "esperant Jugador");
                 Debug.Log($"[NetworkManager] Unió a la partida correcta. ID: {GameId} | Mode: {GameMode} | Contra: {opponentInfo}");
                 
                 callback?.Invoke(true);
@@ -328,9 +328,7 @@ public class NetworkManager : MonoBehaviour
 
     private void Update()
     {
-#if !UNITY_WEBGL || UNITY_EDITOR
         _websocket?.DispatchMessageQueue();
-#endif
     }
 
     private async void OnApplicationQuit()
@@ -389,7 +387,7 @@ public class PartidaDTO
     public int id;
     public string mode;
     public int player1;
-    public int? player2;
+    public int player2;
     public string status;
 }
 
