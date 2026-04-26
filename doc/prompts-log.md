@@ -44,3 +44,19 @@
 * **Resultat:** Sincronització absoluta sense errors internament ni en consola. Els jugadors es mouen correctament i coincideixen en qui té la bomba.
 
 ---
+
+## Fase 6: Poliment Multijugador i Prevenció de Multi-Tab
+
+* **Data:** 26/04/2026
+* **Context / Problema:** Quan un usuari obria múltiples pestanyes o es recarregava la pàgina, es corrompia l'estat de la partida al WebSocket (creant jugadors "fantasma"). A més, no hi havia forma de gestionar justament quan un oponent abandonava o desconnectava a mig joc.
+* **Prompt utilitzat:** > `Millora el sistema de WebSockets del backend per prevenir inicis de sessió múltiples del mateix UUID actiu (gestió de "Múltiples Pestanyes"). A més, quan detectis que un usuari tanca la connexió durant la partida, emet un esdeveniment 'opponent_abandoned'. Al client de Unity, integra això modificant el GameManager i l'EndgameController perquè es declari victòria automàtica amb el missatge "Oponent ha abandonat".`
+* **Resultat:** Sessió multijugador robusta. Prevenció de conflictes per dobles connexions i atorgament just de victòries per abandonament.
+
+---
+
+## Fase 7: Desplegament WebGL i Interpolació de Xarxa
+
+* **Data:** 26/04/2026
+* **Context / Problema:** Els rivals tenien problemes de "jitter" (tremolor) perquè els motors físics locals i les dades asíncrones col·lidien. Calia solucionar-ho per polir la jugabilitat i publicar oficialment el joc.
+* **Prompt utilitzat:** > `Extreu la lògica de sincronització de coordenades del jugador remot cap a un nou script exclusiu anomenat 'NetworkPlayerSync'. En aquest script, posa el Rigidbody2D del rival com a isKinematic=true per desconnectar-lo del motor físic local, i utilitza Vector2.Lerp per interpolar fluidament entre les posicions rebudes. Finalment, prepara l'aplicació per fer-ne una build WebGL i explica com desplegar-la i configurar Nginx per servir els fitxers a 'ticktack-tag.dam.inspedralbes.cat'.`
+* **Resultat:** Moviments d'oponents molts més fluids i sense tremolors. Client empaquetat en WebGL i llançament a producció complet al servidor remot.

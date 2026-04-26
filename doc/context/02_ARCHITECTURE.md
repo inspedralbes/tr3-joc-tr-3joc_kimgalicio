@@ -1,10 +1,11 @@
 # 02_ARCHITECTURE
 
 ## Stack Tecnològic
-- **Client (Unity)**: Motor Unity 2D, C#.
+- **Client (Unity)**: Motor Unity 2022+ 2D, C#, Exportació a **WebGL**.
+- **Servidor i Desplegament**: Nginx com a servidor web estàtic (Client WebGL) i proxy invers. Domini configurat: `ticktack-tag.dam.inspedralbes.cat`.
 - **Backend (Servidor)**: Node.js, Express.
-- **Base de Dades**: MySQL.
-- **Comunicació**: HTTP (Login/Join) + WebSockets (Gameplay en temps real).
+- **Base de Dades**: MySQL (via Docker).
+- **Comunicació**: HTTP (Login/Join) + WebSockets (Gameplay en temps real, Matchmaking).
 - **IA**: Unity ML-Agents per al comportament dels bots.
 - **UI**: Unity UI Toolkit (UXML/USS).
 
@@ -12,28 +13,26 @@
 
 ### Gestió d'Estat (`GameStateSO`)
 - Utilitza un **ScriptableObject** com a font central de veritat local.
-- Sincronitza dades amb el backend en partides multijugador.
+- Sincronitza dades amb el backend i orquestra canvis per a diferents subsistemes (Bomba, Jugadors, HUD).
 
-### Gestió de Xarxa (`NetworkManager`)
-- Orquestra la comunicació amb el backend.
-- Gestiona el cicle de vida de la connexió WebSocket i despatxa els esdeveniments de xarxa cap als sistemes de joc.
+### Gestió de Xarxa (`NetworkManager` i `NetworkPlayerSync`)
+- **NetworkManager**: Orquestra la comunicació asíncrona amb el backend i manté l'estat de connexió i cua d'esdeveniments (gestió del buffer fins que la UI canvia d'escena).
+- **NetworkPlayerSync**: Script dedicat als jugadors remots. Elimina físiques conflictives (`isKinematic = true`) i s'encarrega d'interpolar les dades de moviment (DTO) enviades per la xarxa, alhora que crida funcions de l'animador i volteja sprites.
 
-### Backend (Arquitectura de Repositoris)
-- **Controladors**: Gestionen les peticions HTTP i la lògica de negocis.
-- **Repositoris (MySQL)**: Capa d'abstracció per a la persistència de dades. L'esquema es defineix a `database.sql` i inclou taules per a `users` (credencials, wins, losses), `games` i `skins`.
-- **WebSocket Gateway**: Sincronització d'estats de partida (moviments, transferències de bomba i explosions).
-- **Protocol de Sincronització Determinista**: S'utilitzen dades compartides de la sala (com el `GameId`) com a llavor per a esdeveniments aleatoris (ex: assignació inicial de la bomba), garantint consistència sense autoritat central de servidor.
-- **Contractes de Dades Unificats**: Ús de DTOs estandarditzats (`WsMoveMessage`, `LoginResponse`) amb estructures niades per a una millor escalabilitat i compatibilitat entre Node.js i Unity.
+### Backend (Arquitectura de Repositoris i WebSockets)
+- **Controladors**: Gestionen les peticions HTTP de Login.
+- **Repositoris (MySQL)**: Accés a taules per usuaris (credencials, wins, losses), skins i jocs.
+- **WebSocket Gateway**: Cua de Matchmaking (esperant oponent), assignació de `GameId`, broadcast d'esdeveniments (moviment, traspàs de bomba, desconexions). Controla la presència d'usuaris evitant el doble-login i connexions de pestanyes inactives o múltiples per un mateix ID.
+- **Sincronització Determinista**: Tot es genera a partir del `GameId`. Quan un oponent abandona, s'emet un missatge de `game_end` automàtic en lloc d'esperar el servidor com a autoritat principal de col·lisions.
 
 ### Flux de Joc (`GameManager`)
-- Gestiona transicions, respawns i vides.
-- **Identificació d'Autoritat**: Assigna el rol de local/remoto als agents basant-se en la sessió de xarxa.
+- Gestiona transicions, respawns i el cicle de vides/rondes.
+- Responsable de preparar correctament als actors locals i remots, inicialitzar temporitzadors, i comunicar-se amb `HUDController` per mostrar canvis de ronda.
+- Quan detecta una mort remota o victòria per abandó des del `NetworkManager`, invoca l'`EndgameController` amb els missatges pertinents.
 
 ### Interfície i Control (`UI Toolkit` & `Input System`)
-- **UI Controllers**: Scripts C# (`MenuController`, `HUDController`) que vinculen la lògica amb els fitxers visual UXML.
-- **Input System Actions**: Mapeig de tecles i controls modern que alimenta tant al jugador com al sistema d'IA (Heuristic mode).
+- **UI Controllers**: Scripts C# (`MenuController`, `HUDController`, `EndgameController`) que vinculen i actualitzen elements gràfics (UXML) sense interrupcions en la lògica de joc base.
+- **Input System Actions**: Mapeig de controls tant per a jugador com agents (IA).
 
 ### IA i Agents (`IA_Models`)
-- **BotController**: Agent de ML-Agents que integra l'Inferència Engine per executar models `.onnx`.
-- **Model Swapping**: Lògica per intercanviar actius de comportament (Catcher/Evader) programàticament.
-
+- **BotController**: Agent de ML-Agents. Utilitza "Brain Swapping" per alternar entre `Catcher` i `Evader`.

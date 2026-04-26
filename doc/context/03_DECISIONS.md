@@ -11,9 +11,9 @@ Utilitzem `GameStateSO` com a nucli central de dades.
 S'ha eliminat qualsevol mecànica d'"atac" o de "monedes".
 - **Per què**: L'objectiu és centrar-se en la mecànica pura de la "Patata Calenta" i l'habilitat de plataformes.
 
-## Migració a MySQL i Docker
-Es va decidir migrar d'una persistència en memòria a una base de dades MySQL.
-- **Per què**: Permet mantenir estadístiques reals dels jugadors, gestionar l'autenticació de forma persistent i escalar el servidor mitjançant Docker.
+## Migració a MySQL i Docker, Desplegament WebGL
+Es va decidir migrar d'una persistència en memòria a una base de dades MySQL i empaquetar el backend amb Docker. A més, el client de Unity s'ha compilat per a **WebGL**.
+- **Per què**: Permet accessibilitat universal des de qualsevol navegador modern, escalar fàcilment amb un servidor Nginx, i centralitzar l'autenticació/persistencia en el servidor de producció.
 
 ## UI Toolkit per sobre de uGUI
 S'ha adoptat **UI Toolkit** (UXML/USS) per al desenvolupament de la interfície de menús i pantalles final de partida.
@@ -23,15 +23,10 @@ S'ha adoptat **UI Toolkit** (UXML/USS) per al desenvolupament de la interfície 
 En lloc d'un únic model per a tot, s'utilitza una tècnica de "Brain Swapping".
 - **Per què**: Permet al bot ser extremadament bo en rols oposats (perseguir vs fugir) canviant el model neuronal en temps real basant-se en si té la bomba o no, evitant que un sol model hagi d'aprendre dos comportaments en conflicte.
 
-## Unity New Input System
-S'ha abandonat l'enfocament d'Input.GetAxis heredat per l'Input System modern (Package Com.unity.inputsystem).
-- **Per què**: Permet un mapeig més net per a diferents controladors (comandament, teclat) i facilita la injecció de controls calculats per la IA en el mode heuristic de ML-Agents.
+## Sincronització Determinista i Autoritat Híbrida
+En lloc de fer que el servidor enviï constantment estats i col·lisions absolutistes, els clients tenen autoritat local i utilitzen `NetworkPlayerSync` per als oponents.
+- **Per què**: Redueix la latència percebuda en el propi moviment. Els jugadors remots es tornen `isKinematic` per no interactuar malament amb les físiques locals, interpolant només les coordenades. 
 
-## Patró Repository al Backend
-L'accés a dades a Node.js no es fa directament des dels controladors, sinó a través de Repositoris.
-- **Per què**: Facilita el manteniment i permet canviar de base de dades (ex: de MySQL a una altra) sense tocar la lògica de negocis dels serveis o controladors.
-
-## Sincronització Determinista en servidors "Dumb"
-En lloc de fer que el servidor enviï l'estat inicial de la bomba o el temps, els clients calculen aquests valors de forma determinista.
-- **Per què**: Redueix la càrrega del servidor i la complexitat del codi backend, permetent que un servidor de simple broadcast (WebSockets) mantingui la coherència total de la partida usant l'ID de la sala com a llavor aleatòria compartida.
-
+## Prevenció de Desincronització (Multi-Tab) i Abandons
+S'ha reforçat l'estat en memòria del servidor WebSocket (`activeConnections`) de tal manera que si el mateix usuari obre múltiples pestanyes, només la primera s'accepta i les següents es deneguen, i si algú abandona la partida, el client rep automàticament la victòria.
+- **Per què**: Assegura l'estabilitat i la consistència. Evita que accions de pestanyes "fantasma" destrueixin l'estat d'una partida i protegeix l'experiència d'usuari (UX) atorgant la victòria en cas de fugida de l'oponent.
