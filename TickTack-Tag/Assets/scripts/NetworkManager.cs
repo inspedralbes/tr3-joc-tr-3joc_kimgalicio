@@ -343,7 +343,9 @@ public class NetworkManager : MonoBehaviour
 
     private void Update()
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         _websocket?.DispatchMessageQueue();
+#endif
     }
 
     private async void OnApplicationQuit()
