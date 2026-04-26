@@ -115,6 +115,18 @@ public class NetworkPlayerSync : MonoBehaviour
         var data = NetworkManager.Instance.CurrentGameData;
         if (userId == data.player1.ToString()) return 0;
         if (data.player2 != 0 && userId == data.player2.ToString()) return 1;
+        
+        if (data.player2 == 0 && userId != data.player1.ToString())
+        {
+            int parsedId;
+            if (int.TryParse(userId, out parsedId))
+            {
+                data.player2 = parsedId;
+                Debug.Log($"[Sync] Fallback: Assigned userId {userId} as player2.");
+                return 1;
+            }
+        }
+        
         return -1;
     }
 }

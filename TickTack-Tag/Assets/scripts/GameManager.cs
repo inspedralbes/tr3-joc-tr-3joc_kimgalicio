@@ -35,6 +35,12 @@ public class GameManager : MonoBehaviour
     {
         if (Instance == null) Instance = this;
         _mainCamera = Camera.main;
+        
+        if (GetComponent<NetworkPlayerSync>() == null)
+        {
+            gameObject.AddComponent<NetworkPlayerSync>();
+            Debug.Log("[GameManager] NetworkPlayerSync added automatically.");
+        }
     }
 
     private void OnEnable()
