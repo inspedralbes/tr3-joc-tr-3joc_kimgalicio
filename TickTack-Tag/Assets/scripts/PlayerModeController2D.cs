@@ -239,4 +239,23 @@ public class PlayerModeController2D : MonoBehaviour
             Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
     }
+
+    public void SetRemote(bool isRemote)
+    {
+        useAiInput = isRemote;
+        if (rb != null)
+        {
+            if (isRemote)
+            {
+                rb.bodyType = RigidbodyType2D.Kinematic;
+                rb.useFullKinematicContacts = true;
+            }
+            else
+            {
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                rb.useFullKinematicContacts = false;
+            }
+        }
+    }
 }
+

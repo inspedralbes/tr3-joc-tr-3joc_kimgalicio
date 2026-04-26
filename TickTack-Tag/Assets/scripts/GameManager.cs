@@ -63,20 +63,52 @@ public class GameManager : MonoBehaviour
             Debug.Log("[GameManager] Partida a punt (Sincronitzat). Iniciant ronda...");
             _waitingForPlayers = false;
             if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(false);
-            StartCoroutine(RoundResetCoroutine());
+            StartCoroutine(RoundResetCoroutine(false));
         }
     }
+
+    private bool _abandonmentOccurred = false;
+    public bool AbandonmentOccurred => _abandonmentOccurred;
 
     private void HandleOpponentDisconnected()
     {
         Debug.LogWarning("[GameManager] L'oponent ha abandonat la partida.");
-        // Podríem tornar al menú o mostrar un missatge
+        if (_isTransitioning || GameState.GameOver) return;
+
         if (HUDController.Instance != null) 
         {
-            HUDController.Instance.SetWaitingForOpponent(true); // O un altre mètode per mostrar l'estat
+            HUDController.Instance.SetWaitingForOpponent(true);
+        }
+
+        // Si estàvem jugant, forcem que guanyi el jugador local
+        if (!_waitingForPlayers)
+        {
+            _abandonmentOccurred = true;
+
+            string myName = "";
+            string loserName = "";
+
+            if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.UserId))
+            {
+                GameObject myEntity = GetEntityById(NetworkManager.Instance.UserId);
+                if (myEntity != null) myName = myEntity.name;
+            }
+
+            foreach (var entity in Entities)
+            {
+                if (entity != null && entity.name != myName)
+                {
+                    loserName = entity.name;
+                    break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(loserName))
+            {
+                EndGame(loserName);
+            }
         }
     }
-
     void Start()
     {
         if (GameState == null) return;
@@ -118,31 +150,48 @@ public class GameManager : MonoBehaviour
         // --- LÒGICA DE CLONAT DINÀMIC PER A MULTIJUGADOR ---
         if (GameState.SelectedMode == GameModeType.VsPlayer)
         {
-            // Busquem si ja tenim dos jugadors (per si ja hem passat per aquí)
-            List<GameObject> activePlayers = new List<GameObject>();
             GameObject originalPlayer = null;
+            GameObject botObject = null;
+            GameObject remotePlayer = null;
 
+            // Identificar jugador original y el bot
             foreach (var e in Entities)
             {
                 if (e == null) continue;
-                if (!e.name.ToLower().Contains("bot") && !e.CompareTag("Bot"))
+                if (e.name.ToLower().Contains("bot") || e.CompareTag("Bot"))
                 {
-                    activePlayers.Add(e);
+                    botObject = e;
+                }
+                else if (e.name.Contains("_Remote"))
+                {
+                    remotePlayer = e;
+                }
+                else
+                {
                     originalPlayer = e;
                 }
             }
 
-            // Si només en tenim un, en creem un altre automàticament
-            if (activePlayers.Count == 1 && originalPlayer != null)
+            // Desactivar el bot en modo VsPlayer
+            if (botObject != null)
+            {
+                botObject.SetActive(false);
+            }
+
+            // Crear el clon estrictamente si estamos solos
+            if (originalPlayer != null && remotePlayer == null)
             {
                 Debug.Log("[GameManager] Només s'ha trobat 1 Player. Creant clon per al Jugador 2...");
                 GameObject player2 = Instantiate(originalPlayer, originalPlayer.transform.parent);
                 player2.name = originalPlayer.name + "_Remote";
-                
-                // Actualitzem l'array d'Entities per incloure el nou jugador
-                List<GameObject> newEntities = new List<GameObject>(Entities);
-                newEntities.Add(player2);
-                Entities = newEntities.ToArray();
+
+                // Forzar array tamaño 2 exacto: original y clon
+                Entities = new GameObject[] { originalPlayer, player2 };
+            }
+            else if (originalPlayer != null && remotePlayer != null)
+            {
+                // Si ya se clonó antes, asegurarse de que el array sea solo de 2
+                Entities = new GameObject[] { originalPlayer, remotePlayer };
             }
         }
         
@@ -153,28 +202,17 @@ public class GameManager : MonoBehaviour
 
             if (GameState.SelectedMode == GameModeType.VsPlayer)
             {
-                if (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot"))
-                {
-                    entity.SetActive(false);
-                    continue;
-                }
-
                 entity.SetActive(true);
                 var controller = entity.GetComponent<PlayerModeController2D>();
                 if (controller != null && NetworkManager.Instance != null)
                 {
                     bool sócJugador1 = NetworkManager.Instance.IsPlayer1;
                     
-                    // L'entitat 0 sempre és el "primer human", l'entitat 1 el "segon human"
-                    // Si hi ha més entitats (clonades), les tractem segons el seu ordre
-                    int humanIndex = 0;
-                    for(int j=0; j<i; j++) {
-                        if (Entities[j] != null && !Entities[j].name.ToLower().Contains("bot")) humanIndex++;
-                    }
-
-                    controller.useAiInput = (sócJugador1 ? (humanIndex != 0) : (humanIndex != 1));
+                    // i=0 es el Jugador 1 (host), i=1 es el Jugador 2 (cliente)
+                    bool isRemote = sócJugador1 ? (i != 0) : (i != 1);
+                    controller.SetRemote(isRemote);
                     
-                    Debug.Log($"[GameManager] {entity.name} (Índex {i}, Humà {humanIndex}) configurada. Local: {!controller.useAiInput}");
+                    Debug.Log($"[GameManager] {entity.name} (Índex {i}) configurada. Local: {!isRemote}");
                 }
                 GameState.InitializeEntity(entity.name);
             }
@@ -190,7 +228,7 @@ public class GameManager : MonoBehaviour
                 {
                     entity.SetActive(true);
                     var controller = entity.GetComponent<PlayerModeController2D>();
-                    if (controller != null) controller.useAiInput = false;
+                    if (controller != null) controller.SetRemote(false);
                     GameState.InitializeEntity(entity.name);
                 }
             }
@@ -208,7 +246,7 @@ public class GameManager : MonoBehaviour
                 Debug.Log("[GameManager] La partida ja estava a punt. Iniciant immediatament.");
                 _waitingForPlayers = false;
                 if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(false);
-                StartCoroutine(RoundResetCoroutine());
+                StartCoroutine(RoundResetCoroutine(false));
             }
             else
             {
@@ -319,7 +357,7 @@ public class GameManager : MonoBehaviour
             EndGame(deadEntity.name);
             return;
         }
-        StartCoroutine(RoundResetCoroutine());
+        StartCoroutine(RoundResetCoroutine(true));
     }
 
     private void EndGame(string loserName)
@@ -342,18 +380,34 @@ public class GameManager : MonoBehaviour
         int winnerId = 0;
         if (winnerEntity != null)
         {
-            if (winnerEntity.name.ToLower().Contains("bot") || winnerEntity.CompareTag("Bot")) winnerId = 0;
-            else winnerId = (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.UserId)) ? int.Parse(NetworkManager.Instance.UserId) : 1;
+            if (winnerEntity.name.ToLower().Contains("bot") || winnerEntity.CompareTag("Bot")) 
+            {
+                winnerId = 0;
+            }
+            else 
+            {
+                string idStr = GetUserIdOf(winnerEntity);
+                if (!string.IsNullOrEmpty(idStr)) winnerId = int.Parse(idStr);
+                else winnerId = 1;
+            }
         }
         OnLocalGameOver?.Invoke(winnerId, maxLives);
-        if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId)) NetworkManager.Instance.FinishGame(winnerId, maxLives);
+        
+        if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId)) 
+        {
+            bool canSendFinish = NetworkManager.Instance.IsPlayer1 || _abandonmentOccurred;
+            if (canSendFinish)
+            {
+                NetworkManager.Instance.FinishGame(winnerId, maxLives);
+            }
+        }
     }
 
-    private IEnumerator RoundResetCoroutine()
+    private IEnumerator RoundResetCoroutine(bool incrementRound = true)
     {
         _isTransitioning = true;
         yield return new WaitForSeconds(1.0f);
-        if (GameState != null) GameState.CurrentRound++;
+        if (GameState != null && incrementRound) GameState.CurrentRound++;
         if (HUDController.Instance != null)
         {
             bool countdownFinished = false;
