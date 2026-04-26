@@ -101,11 +101,8 @@ public class NetworkPlayerSync : MonoBehaviour
 
         if (loser != null && _gameManager.GameState != null)
         {
-            // Actualitzem les vides localment per sincronitzar els HUDs
-            _gameManager.GameState.SubtractLife(loser.name);
-            
-            // Si les vides del missatge són diferents a les locals, forcem sincronització (opcional)
-            // if (_gameManager.GameState.GetLives(loser.name) != livesLeft) ...
+            // Sincronitzem la quantitat exacta de vides en lloc de restar-ne una altra
+            _gameManager.GameState.SetLives(loser.name, livesLeft);
         }
     }
 

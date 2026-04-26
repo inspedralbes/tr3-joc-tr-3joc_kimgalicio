@@ -458,24 +458,29 @@ public class GameManager : MonoBehaviour
 
         if (candidates.Count > 0)
         {
-            int index = 0;
-
             // En multijugador, usem l'ID de la partida com a llavor perquè tots els clients triïn el mateix
             if (GameState.SelectedMode == GameModeType.VsPlayer && NetworkManager.Instance != null && NetworkManager.Instance.CurrentGameData != null)
             {
-                int seed = NetworkManager.Instance.CurrentGameData.id;
+                var data = NetworkManager.Instance.CurrentGameData;
+                int seed = data.id + GameState.CurrentRound;
                 System.Random rnd = new System.Random(seed);
-                index = rnd.Next(0, candidates.Count);
-                Debug.Log($"[GameManager] Assignació determinista de bomba (Llavors: {seed}). Índex: {index}");
-            }
-            else
-            {
-                index = UnityEngine.Random.Range(0, candidates.Count);
+                
+                int chosenPlayerNum = rnd.Next(0, 2);
+                string chosenUserId = (chosenPlayerNum == 0) ? data.player1.ToString() : data.player2.ToString();
+                
+                GameObject newOwner = GetEntityById(chosenUserId);
+                if (newOwner != null)
+                {
+                    Bomb bomb = FindFirstObjectByType<Bomb>();
+                    if (bomb != null) bomb.TransferTo(newOwner);
+                    return; // Sortim perquè ja s'ha assignat
+                }
             }
 
-            GameObject newOwner = candidates[index];
-            Bomb bomb = FindFirstObjectByType<Bomb>();
-            if (bomb != null && newOwner != null) bomb.TransferTo(newOwner);
+            int index = UnityEngine.Random.Range(0, candidates.Count);
+            GameObject fallbackOwner = candidates[index];
+            Bomb fallbackBomb = FindFirstObjectByType<Bomb>();
+            if (fallbackBomb != null) fallbackBomb.TransferTo(fallbackOwner);
         }
     }
     public string GetUserIdOf(GameObject entity)

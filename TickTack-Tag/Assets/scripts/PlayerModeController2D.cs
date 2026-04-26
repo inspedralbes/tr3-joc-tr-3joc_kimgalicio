@@ -85,27 +85,43 @@ public class PlayerModeController2D : MonoBehaviour
         }
     }
 
+    private Vector3 _lastPosition;
+
     private void UpdateAnimations()
     {
         string newState;
 
-        if (isClimbing && Mathf.Abs(input.y) > 0.1f && mode == GameMode.Platformer)
+        Vector2 effectiveVelocity = rb.linearVelocity;
+        float effectiveInputX = input.x;
+        float effectiveInputY = input.y;
+
+        if (useAiInput)
+        {
+            // Per a entitats remotes (Kinematic), calculem la velocitat a partir del canvi de posició
+            Vector3 deltaPos = (transform.position - _lastPosition) / Time.deltaTime;
+            effectiveVelocity = deltaPos;
+            effectiveInputX = Mathf.Abs(deltaPos.x) > 0.5f ? Mathf.Sign(deltaPos.x) : 0f;
+            effectiveInputY = Mathf.Abs(deltaPos.y) > 0.5f ? Mathf.Sign(deltaPos.y) : 0f;
+            _lastPosition = transform.position;
+        }
+
+        if (isClimbing && Mathf.Abs(effectiveInputY) > 0.1f && mode == GameMode.Platformer)
         {
             newState = ANIM_WALK;
         }
         else if (!IsGrounded())
         {
             // Per entitats remotes (kinematic), mirem la velocitat calculada o l'estat previ
-            if (rb.linearVelocity.y > 0.1f)
+            if (effectiveVelocity.y > 0.1f)
                 newState = ANIM_JUMP;
-            else if (rb.linearVelocity.y < -0.1f)
+            else if (effectiveVelocity.y < -0.1f)
                 newState = ANIM_FALL;
             else
                 newState = _currentAnimState;
         }
         else
         {
-            if (Mathf.Abs(input.x) > 0.01f || (mode == GameMode.TopDown && Mathf.Abs(input.y) > 0.01f))
+            if (Mathf.Abs(effectiveInputX) > 0.01f || (mode == GameMode.TopDown && Mathf.Abs(effectiveInputY) > 0.01f))
                 newState = ANIM_WALK;
             else
                 newState = ANIM_IDLE;
@@ -113,9 +129,9 @@ public class PlayerModeController2D : MonoBehaviour
 
         ChangeAnimationState(newState);
 
-        if (spriteRenderer != null && input.x != 0)
+        if (spriteRenderer != null && effectiveInputX != 0)
         {
-            spriteRenderer.flipX = input.x < 0;
+            spriteRenderer.flipX = effectiveInputX < 0;
         }
     }
 

@@ -92,4 +92,13 @@ public class GameStateSO : ScriptableObject
             OnChanged?.Invoke();
         }
     }
+
+    public void SetLives(string entityName, int lives)
+    {
+        if (EntityLives != null && EntityLives.ContainsKey(entityName))
+        {
+            EntityLives[entityName] = Mathf.Max(0, lives);
+            OnChanged?.Invoke();
+        }
+    }
 }
