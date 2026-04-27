@@ -86,9 +86,9 @@ public class Bomb : MonoBehaviour
         if (_gameManager != null) _gameManager.HandleDeath(loser);
     }
 
-    public void TransferTo(GameObject newOwner)
+    public bool TransferTo(GameObject newOwner, bool bypassCooldown = false)
     {
-        if (GameState.CurrentBombOwner != null && Time.time - _lastTransferTime < TransferCooldown) return;
+        if (!bypassCooldown && GameState.CurrentBombOwner != null && Time.time - _lastTransferTime < TransferCooldown) return false;
 
         if (GameState.CurrentBombOwner != null)
         {
@@ -100,6 +100,7 @@ public class Bomb : MonoBehaviour
         _lastTransferTime = Time.time;
         _hasExploded = false;
         Debug.Log($"Bomba transferida a {newOwner.name}");
+        return true;
     }
 
     private void ApplyBombState(GameObject owner)

@@ -85,7 +85,7 @@ public class NetworkPlayerSync : MonoBehaviour
         Bomb bomb = FindFirstObjectByType<Bomb>();
         if (bomb != null && newOwner != null)
         {
-            bomb.TransferTo(newOwner);
+            bomb.TransferTo(newOwner, true);
         }
     }
 

@@ -24,10 +24,10 @@ public class TagCollision : MonoBehaviour
                 Bomb bomb = FindFirstObjectByType<Bomb>();
                 if (bomb != null)
                 {
-                    bomb.TransferTo(collision.gameObject);
+                    bool success = bomb.TransferTo(collision.gameObject);
 
                     // --- MULTIPLAYER SYNC ---
-                    if (NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
+                    if (success && NetworkManager.Instance != null && !string.IsNullOrEmpty(NetworkManager.Instance.GameId))
                     {
                         string targetUserId = _gameManager != null ? _gameManager.GetUserIdOf(collision.gameObject) : "";
                         if (!string.IsNullOrEmpty(targetUserId))

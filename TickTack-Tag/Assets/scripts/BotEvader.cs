@@ -91,7 +91,7 @@ public class BotEvader : Agent
             if (bomb != null)
             {
 
-                bomb.TransferTo(OpponentTarget.gameObject);
+                bomb.TransferTo(OpponentTarget.gameObject, true);
                 GameState.GameTimer = GameState.InitialTimer;
             }
         }

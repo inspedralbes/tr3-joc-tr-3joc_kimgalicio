@@ -461,7 +461,7 @@ public class GameManager : MonoBehaviour
                 if (newOwner != null)
                 {
                     Bomb bomb = FindFirstObjectByType<Bomb>();
-                    if (bomb != null) bomb.TransferTo(newOwner);
+                    if (bomb != null) bomb.TransferTo(newOwner, true);
                     return;
                 }
             }
@@ -469,7 +469,7 @@ public class GameManager : MonoBehaviour
             int index = UnityEngine.Random.Range(0, candidates.Count);
             GameObject fallbackOwner = candidates[index];
             Bomb fallbackBomb = FindFirstObjectByType<Bomb>();
-            if (fallbackBomb != null) fallbackBomb.TransferTo(fallbackOwner);
+            if (fallbackBomb != null) fallbackBomb.TransferTo(fallbackOwner, true);
         }
     }
     public string GetUserIdOf(GameObject entity)
