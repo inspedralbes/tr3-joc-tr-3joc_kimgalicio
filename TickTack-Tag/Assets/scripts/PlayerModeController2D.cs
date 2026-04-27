@@ -11,6 +11,7 @@ public class PlayerModeController2D : MonoBehaviour
     [Header("Mode")]
     [SerializeField] private GameMode mode = GameMode.Platformer;
     [SerializeField] public bool useAiInput = false;
+    public bool isRemotePlayer = false;
 
     [Header("Movement")]
     [SerializeField] private float topDownSpeed = 4f;
@@ -48,11 +49,7 @@ public class PlayerModeController2D : MonoBehaviour
         defaultGravity = (mode == GameMode.TopDown) ? 0f : 1f;
         ApplyModeSettings();
 
-        if (useAiInput)
-        {
-            rb.bodyType = RigidbodyType2D.Kinematic;
-            rb.useFullKinematicContacts = true;
-        }
+        // Removed Kinematic override for useAiInput, SetRemote handles this for remote players.
 
         if (GameState != null) GameState.InitializeEntity(gameObject.name);
     }
@@ -151,7 +148,7 @@ public class PlayerModeController2D : MonoBehaviour
     {
         if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name))) return;
 
-        if (useAiInput) return;
+        if (isRemotePlayer) return;
 
         float effectiveSpeed = (mode == GameMode.TopDown ? topDownSpeed : platformerSpeed) * _currentSpeedMultiplier;
 
@@ -254,6 +251,7 @@ public class PlayerModeController2D : MonoBehaviour
 
     public void SetRemote(bool isRemote)
     {
+        isRemotePlayer = isRemote;
         useAiInput = isRemote;
         if (rb != null)
         {
