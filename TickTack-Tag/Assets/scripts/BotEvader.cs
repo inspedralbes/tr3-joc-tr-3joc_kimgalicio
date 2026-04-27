@@ -31,6 +31,14 @@ public class BotEvader : Agent
 
     public override void Initialize()
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        var bp = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
+        if (bp != null)
+        {
+            bp.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+        }
+#endif
+
         if (Controller == null) Controller = GetComponent<PlayerModeController2D>();
         if (GameState != null)
         {
@@ -164,6 +172,23 @@ public class BotEvader : Agent
         var continuousActionsOut = actionsOut.ContinuousActions;
         var discreteActionsOut = actionsOut.DiscreteActions;
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+        if (OpponentTarget != null)
+        {
+            Vector2 dir = (OpponentTarget.position - transform.position).normalized;
+            float dist = Vector2.Distance(transform.position, OpponentTarget.position);
+
+            continuousActionsOut[0] = dist < distanceThreshold ? -Mathf.Sign(dir.x) : 0f;
+            discreteActionsOut[0] = (_isNearLadder && Random.value < 0.1f) ? 1 : 0;
+
+            if (_isNearLadder && dist < distanceThreshold && dir.y < 0) 
+                discreteActionsOut[1] = 1;
+            else if (_isNearLadder && dist < distanceThreshold && dir.y > 0)
+                discreteActionsOut[1] = 2;
+            else
+                discreteActionsOut[1] = 0;
+        }
+#else
         continuousActionsOut[0] = Input.GetAxisRaw("Horizontal");
         discreteActionsOut[0] = Input.GetKey(KeyCode.Space) ? 1 : 0;
 
@@ -171,6 +196,7 @@ public class BotEvader : Agent
         if (v > 0) discreteActionsOut[1] = 1;
         else if (v < 0) discreteActionsOut[1] = 2;
         else discreteActionsOut[1] = 0;
+#endif
     }
 
     public void ApplySpeedMultiplier(float multiplier)

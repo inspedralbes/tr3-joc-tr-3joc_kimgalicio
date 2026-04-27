@@ -65,7 +65,7 @@ public class PlayerModeController2D : MonoBehaviour
             return;
         }
 
-        if (!useAiInput)
+        if (!useAiInput && !isRemotePlayer)
         {
             input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
@@ -91,14 +91,18 @@ public class PlayerModeController2D : MonoBehaviour
         float effectiveInputX = input.x;
         float effectiveInputY = input.y;
 
-        if (useAiInput)
+        if (isRemotePlayer)
         {
-            Vector3 deltaPos = (transform.position - _lastPosition) / Time.deltaTime;
-            effectiveVelocity = deltaPos;
-            effectiveInputX = Mathf.Abs(deltaPos.x) > 0.5f ? Mathf.Sign(deltaPos.x) : 0f;
-            effectiveInputY = Mathf.Abs(deltaPos.y) > 0.5f ? Mathf.Sign(deltaPos.y) : 0f;
-            _lastPosition = transform.position;
+            float dt = Time.deltaTime;
+            if (dt > 0.0001f)
+            {
+                Vector3 deltaPos = (transform.position - _lastPosition) / dt;
+                effectiveVelocity = deltaPos;
+                effectiveInputX = Mathf.Abs(deltaPos.x) > 0.1f ? Mathf.Sign(deltaPos.x) : 0f;
+                effectiveInputY = Mathf.Abs(deltaPos.y) > 0.1f ? Mathf.Sign(deltaPos.y) : 0f;
+            }
         }
+        _lastPosition = transform.position;
 
         if (isClimbing && Mathf.Abs(effectiveInputY) > 0.1f && mode == GameMode.Platformer)
         {
@@ -252,7 +256,6 @@ public class PlayerModeController2D : MonoBehaviour
     public void SetRemote(bool isRemote)
     {
         isRemotePlayer = isRemote;
-        useAiInput = isRemote;
         if (rb != null)
         {
             if (isRemote)
