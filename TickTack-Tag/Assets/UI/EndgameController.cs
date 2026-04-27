@@ -97,7 +97,6 @@ public class EndgameController : MonoBehaviour
 
         if (_lblWinner != null)
         {
-            // Comprovar si ha estat per abandonament
             if (GameManager.Instance != null && GameManager.Instance.AbandonmentOccurred)
             {
                 _lblWinner.text = "L'OPONENT HA ABANDONAT!\nHAS GUANYAT LA PARTIDA!";

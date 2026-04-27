@@ -35,7 +35,6 @@ public class NetworkPlayerSync : MonoBehaviour
 
     private void Update()
     {
-        // Aplicar suavitat de moviment a les entitats remotes
         if (_gameManager == null || _gameManager.Entities == null) return;
 
         for (int i = 0; i < _gameManager.Entities.Length; i++)
@@ -47,7 +46,6 @@ public class NetworkPlayerSync : MonoBehaviour
                 {
                     entity.transform.position = Vector3.Lerp(entity.transform.position, _targetPositions[i], Time.deltaTime * 15f);
                     
-                    // Si ja estem molt a prop, marquem com a completat (opcional)
                     if (Vector3.Distance(entity.transform.position, _targetPositions[i]) < 0.001f)
                     {
                         entity.transform.position = _targetPositions[i];
@@ -65,7 +63,6 @@ public class NetworkPlayerSync : MonoBehaviour
         int targetIndex = GetTargetIndex(userId);
         if (targetIndex != -1 && targetIndex < _gameManager.Entities.Length)
         {
-            // Només actualitzem si NO som nosaltres
             if (userId != NetworkManager.Instance.UserId)
             {
                 _targetPositions[targetIndex] = new Vector3(position.x, position.y, 0);
@@ -101,7 +98,6 @@ public class NetworkPlayerSync : MonoBehaviour
 
         if (loser != null && _gameManager.GameState != null)
         {
-            // Sincronitzem la quantitat exacta de vides en lloc de restar-ne una altra
             _gameManager.GameState.SetLives(loser.name, livesLeft);
         }
     }

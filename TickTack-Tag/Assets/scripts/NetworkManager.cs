@@ -42,11 +42,9 @@ public class NetworkManager : MonoBehaviour
 
     private void Awake()
     {
-        // Configurem les URLs segons si estem en producció o local
         httpUrl = useProduction ? prodHttpUrl : localHttpUrl;
         wsUrl = useProduction ? prodWsUrl : localWsUrl;
 
-        // Auto-upgrade to HTTPS/WSS if we are on an HTTPS page (Mixed Content prevention)
 #if UNITY_WEBGL && !UNITY_EDITOR
         if (Application.absoluteURL.StartsWith("https://"))
         {
@@ -105,7 +103,7 @@ public class NetworkManager : MonoBehaviour
 
     public void JoinGame(GameModeType mode, Action<bool> callback = null)
     {
-        IsGameReady = false; // Reset ready state when joining a new game
+        IsGameReady = false;
         GameMode = mode;
         string modeStr = (mode == GameModeType.VsBot) ? "vs_bot" : "vs_player";
         StartCoroutine(PostJoin(modeStr, callback));

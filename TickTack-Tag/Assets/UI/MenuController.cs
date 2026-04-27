@@ -74,11 +74,9 @@ public class MenuController : MonoBehaviour
                     {
                         Debug.Log("[MenuController] FASE 3: Partida trobada. Connectant per WebSocket...");
                         
-                        // Escoltem l'esdeveniment de connexió abans de carregar l'escena
                         NetworkManager.OnConnected += HandleWsConnected;
                         NetworkManager.Instance.ConnectToGame();
 
-                        // Timeout de seguretat: Si en 5 segons no connecta, reactivarem els botons
                         Invoke(nameof(ConnectionTimeout), 5f);
                     }
                     else

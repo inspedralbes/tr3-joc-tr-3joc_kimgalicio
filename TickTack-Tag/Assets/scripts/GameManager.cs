@@ -48,7 +48,6 @@ public class GameManager : MonoBehaviour
         NetworkManager.OnGameReady += HandleGameReady;
         NetworkManager.OnOpponentDisconnected += HandleOpponentDisconnected;
 
-        // Si ja està a punt quan ens activem, processem-ho
         if (NetworkManager.Instance != null && NetworkManager.Instance.IsGameReady)
         {
             Debug.Log("[GameManager] La partida ja està a punt al activar el Manager.");
@@ -86,7 +85,6 @@ public class GameManager : MonoBehaviour
             HUDController.Instance.SetWaitingForOpponent(true);
         }
 
-        // Si estàvem jugant, forcem que guanyi el jugador local
         if (!_waitingForPlayers)
         {
             _abandonmentOccurred = true;
@@ -160,7 +158,6 @@ public class GameManager : MonoBehaviour
             GameObject botObject = null;
             GameObject remotePlayer = null;
 
-            // Identificar jugador original y el bot
             foreach (var e in Entities)
             {
                 if (e == null) continue;
@@ -178,25 +175,21 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            // Desactivar el bot en modo VsPlayer
             if (botObject != null)
             {
                 botObject.SetActive(false);
             }
 
-            // Crear el clon estrictamente si estamos solos
             if (originalPlayer != null && remotePlayer == null)
             {
                 Debug.Log("[GameManager] Només s'ha trobat 1 Player. Creant clon per al Jugador 2...");
                 GameObject player2 = Instantiate(originalPlayer, originalPlayer.transform.parent);
                 player2.name = originalPlayer.name + "_Remote";
 
-                // Forzar array tamaño 2 exacto: original y clon
                 Entities = new GameObject[] { originalPlayer, player2 };
             }
             else if (originalPlayer != null && remotePlayer != null)
             {
-                // Si ya se clonó antes, asegurarse de que el array sea solo de 2
                 Entities = new GameObject[] { originalPlayer, remotePlayer };
             }
         }
@@ -214,7 +207,6 @@ public class GameManager : MonoBehaviour
                 {
                     bool sócJugador1 = NetworkManager.Instance.IsPlayer1;
                     
-                    // i=0 es el Jugador 1 (host), i=1 es el Jugador 2 (cliente)
                     bool isRemote = sócJugador1 ? (i != 0) : (i != 1);
                     controller.SetRemote(isRemote);
                     
@@ -224,7 +216,6 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // Mode Vs Bot original
                 if (entity.name.ToLower().Contains("bot") || entity.CompareTag("Bot"))
                 {
                     entity.SetActive(true);
@@ -260,7 +251,6 @@ public class GameManager : MonoBehaviour
                 if (HUDController.Instance != null) HUDController.Instance.SetWaitingForOpponent(true);
             }
             
-            // Posem als jugadors als seus llocs inicials mentre esperen
             for (int i = 0; i < Entities.Length; i++)
             {
                 if (Entities[i] != null && Entities[i].activeInHierarchy) ResetEntity(Entities[i], i);
@@ -458,7 +448,6 @@ public class GameManager : MonoBehaviour
 
         if (candidates.Count > 0)
         {
-            // En multijugador, usem l'ID de la partida com a llavor perquè tots els clients triïn el mateix
             if (GameState.SelectedMode == GameModeType.VsPlayer && NetworkManager.Instance != null && NetworkManager.Instance.CurrentGameData != null)
             {
                 var data = NetworkManager.Instance.CurrentGameData;
@@ -473,7 +462,7 @@ public class GameManager : MonoBehaviour
                 {
                     Bomb bomb = FindFirstObjectByType<Bomb>();
                     if (bomb != null) bomb.TransferTo(newOwner);
-                    return; // Sortim perquè ja s'ha assignat
+                    return;
                 }
             }
 

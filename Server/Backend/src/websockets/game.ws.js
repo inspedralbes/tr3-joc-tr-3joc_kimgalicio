@@ -102,7 +102,6 @@ function inicialitzarWebSocket(servidorHttp, gameService) {
         if (numJugadors === 2) {
           console.log(`[WS] Partida ${gameIdActual} PLENA. Enviant "game_ready" a tots els jugadors.`);
           
-          // Informem al jugador que ja hi era que s'ha unit algú nou (perquè sàpiga la seva ID)
           broadcast(gameIdActual, userIdActual, {
             action: 'player_joined',
             userId: userIdActual

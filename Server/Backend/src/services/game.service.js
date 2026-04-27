@@ -44,7 +44,6 @@ class GameService {
     const partidaPendent = await this._gameRepository.findPendingGame();
 
     if (partidaPendent) {
-      // Si la partida pendent és nostra, la retornem sense fer res més
       if (partidaPendent.player1 === userId) {
         return partidaPendent;
       }
@@ -72,12 +71,11 @@ class GameService {
     const partida = await this._gameRepository.findById(gameId);
     if (!partida) return;
 
-    // Si la partida encara estava pendent o jugant-se, la marquem com a finalitzada/cancel·lada
     if (partida.status === 'pending' || partida.status === 'playing') {
       console.log(`[GameService] Tancant partida ${gameId} per desconnexió.`);
       await this._gameRepository.updateGame({
         id: gameId,
-        status: 'finished' // O podríem usar un estat 'cancelled' si existís
+        status: 'finished'
       });
     }
   }
@@ -90,8 +88,6 @@ class GameService {
 
     if (!gameId)   throw new Error('El camp gameId és obligatori.');
     
-    // Si winnerId és 0, significa que ha guanyat un bot (o ningú humà).
-    // MySQL no acceptarà 0 si no existeix l'usuari 0, així que usem null.
     const realWinnerId = (winnerId === 0) ? null : winnerId;
 
     const partidaFinalitzada = await this._gameRepository.updateGame({
@@ -112,7 +108,6 @@ class GameService {
         await this._userService.addResult(realWinnerId, true);
       }
 
-      // El perdedor és l'altre si n'hi ha un
       const loserId = player1 === realWinnerId ? player2 : player1;
       if (loserId !== null && loserId !== 0) {
         await this._userService.addResult(loserId, false);

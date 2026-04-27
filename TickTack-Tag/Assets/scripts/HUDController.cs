@@ -72,7 +72,6 @@ public class HUDController : MonoBehaviour
         List<string> activeKeys = new List<string>();
         foreach (var key in gameStateSO.EntityLives.Keys)
         {
-            // Només ens interessen les entitats que estan actives (tenen vides > 0 o estan inicialitzades)
             activeKeys.Add(key);
         }
 
@@ -151,7 +150,6 @@ public class HUDController : MonoBehaviour
         countdownOverlay.style.display = DisplayStyle.Flex;
         countdownOverlay.visible = true;
         
-        // Utilitzem una mida de font conservadora i white-space: nowrap (al UXML) per evitar salts de línia
         lblCountdown.text = "Comença la Ronda " + gameStateSO.CurrentRound;
         lblCountdown.style.fontSize = 45; 
         lblCountdown.style.color = new StyleColor(Color.white);

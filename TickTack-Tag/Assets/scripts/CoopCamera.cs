@@ -31,7 +31,6 @@ public class CoopCamera : MonoBehaviour
         {
             if (entity != null && entity.activeInHierarchy)
             {
-                // Solo seguir si no es espectador (si el GameManager tiene esa info)
                 if (_gameManager.GameState != null && !_gameManager.GameState.Spectators.Contains(entity.name))
                 {
                     activeEntities.Add(entity);

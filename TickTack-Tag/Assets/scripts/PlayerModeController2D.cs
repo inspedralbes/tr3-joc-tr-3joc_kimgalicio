@@ -48,7 +48,6 @@ public class PlayerModeController2D : MonoBehaviour
         defaultGravity = (mode == GameMode.TopDown) ? 0f : 1f;
         ApplyModeSettings();
 
-        // Si és una entitat remota, la posem com a Kinematic per evitar conflictes amb la xarxa
         if (useAiInput)
         {
             rb.bodyType = RigidbodyType2D.Kinematic;
@@ -97,7 +96,6 @@ public class PlayerModeController2D : MonoBehaviour
 
         if (useAiInput)
         {
-            // Per a entitats remotes (Kinematic), calculem la velocitat a partir del canvi de posició
             Vector3 deltaPos = (transform.position - _lastPosition) / Time.deltaTime;
             effectiveVelocity = deltaPos;
             effectiveInputX = Mathf.Abs(deltaPos.x) > 0.5f ? Mathf.Sign(deltaPos.x) : 0f;
@@ -111,7 +109,6 @@ public class PlayerModeController2D : MonoBehaviour
         }
         else if (!IsGrounded())
         {
-            // Per entitats remotes (kinematic), mirem la velocitat calculada o l'estat previ
             if (effectiveVelocity.y > 0.1f)
                 newState = ANIM_JUMP;
             else if (effectiveVelocity.y < -0.1f)
@@ -154,7 +151,6 @@ public class PlayerModeController2D : MonoBehaviour
     {
         if (GameState != null && (GameState.GameOver || GameState.Spectators.Contains(gameObject.name))) return;
 
-        // Si és AI (remot), el moviment el gestiona NetworkPlayerSync via transform o MovePosition
         if (useAiInput) return;
 
         float effectiveSpeed = (mode == GameMode.TopDown ? topDownSpeed : platformerSpeed) * _currentSpeedMultiplier;

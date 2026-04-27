@@ -16,34 +16,25 @@ namespace EditorScripts
 
         private static void SetupHUD()
         {
-            // Només executar a l'editor fora del mode de joc
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
 
-            // Obtenir l'escena activa
             Scene activeScene = EditorSceneManager.GetActiveScene();
             
-            // Assegurar-nos que és l'escena principal, canvia el nom si és diferent
             if (activeScene.name != "TickTack-Tag" && activeScene.name != "Menu") 
             {
-                // Si l'escena activa no es ni TickTack-Tag ni Menu, potser no hem d'actuar
-                // Però només instal·larem el HUD on no existeixi prèviament.
             }
 
-            // Comprovar si ja hem configurat el HUD
             GameObject existingHUD = GameObject.Find("InGameHUD");
             if (existingHUD != null)
             {
-                return; // Ja existeix
+                return;
             }
 
-            // Crear el GameObject
             GameObject hudObj = new GameObject("InGameHUD");
 
-            // Afegir UIDocument
             UIDocument uiDoc = hudObj.AddComponent<UIDocument>();
             uiDoc.sortingOrder = 10;
             
-            // Carregar i assignar el HUD.uxml
             VisualTreeAsset hudUxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/HUD.uxml");
             if (hudUxml != null)
             {
@@ -54,10 +45,8 @@ namespace EditorScripts
                 Debug.LogError("[SetupHUD] No s'ha trobat l'arxiu Assets/UI/HUD.uxml");
             }
 
-            // Afegir HUDController
             HUDController hudController = hudObj.AddComponent<HUDController>();
             
-            // Carregar i assignar el GameStateSO
             GameStateSO gameStateSO = AssetDatabase.LoadAssetAtPath<GameStateSO>("Assets/scripts/New Game State SO.asset");
             if (gameStateSO != null)
             {
@@ -74,7 +63,6 @@ namespace EditorScripts
                 Debug.LogWarning("[SetupHUD] No s'ha trobat el 'New Game State SO.asset' a Assets/scripts/.");
             }
 
-            // Marcar l'escena com a modificada i desar-la
             EditorSceneManager.MarkSceneDirty(activeScene);
             EditorSceneManager.SaveScene(activeScene);
 
