@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ticktack-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "3307:3306"
+    volumes:
+      # S'executa només la primera vegada per crear les taules
+      - ./database.sql:/docker-entrypoint-initdb.d/setup.sql
+      - mysql_data:/var/lib/mysql
+    networks:
+      - ticktack-net
+
+  api:
+    build: .
+    container_name: ticktack-api
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - ticktack-net
+
+networks:
+  ticktack-net:
+    driver: bridge
+
+volumes:
+  mysql_data:

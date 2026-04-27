@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML 
+    xmlns:ui="UnityEngine.UIElements" 
+    xmlns:uie="UnityEditor.UIElements" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" 
+    editor-extension-mode="False">
+    
+    <Style src="project:/Assets/UI/Endgame.uss" />
+    
+    <ui:VisualElement name="endgame-panel">
+        
+        <!-- Decoració Festiva -->
+        <ui:VisualElement name="victory-glow" />
+        
+        <ui:VisualElement name="results-box" class="adventure-panel">
+            
+            <!-- Banner de Victòria -->
+            <ui:VisualElement name="banner-container">
+                <ui:Label text="FI DE LA PARTIDA" name="endgame-title" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="divider" />
+            
+            <!-- Contenidor de Guanyador amb Personatge -->
+            <ui:VisualElement name="winner-container">
+                <ui:VisualElement name="winner-sprite" class="decor-dino" />
+                <ui:Label text="EL GUANYADOR ÉS..." name="lbl-winner-header" class="sub-text" />
+                <ui:Label text="JUGADOR 1" name="lbl-winner" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="button-container">
+                <ui:Button text="REINTENTAR" name="btn-restart" class="primary-button restart-btn" />
+                <ui:Button text="MENÚ PRINCIPAL" name="btn-menu" class="primary-button menu-btn" />
+            </ui:VisualElement>
+            
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

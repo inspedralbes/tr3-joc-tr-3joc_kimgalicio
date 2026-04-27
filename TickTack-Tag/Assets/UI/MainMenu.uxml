@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    
+    <Style src="project:/Assets/UI/MainMenu.uss" />
+
+    <ui:VisualElement name="screen-container">
+        <!-- Decoració de fons (opcional) -->
+        <ui:VisualElement name="bg-glow" />
+
+        <ui:VisualElement name="main-panel" class="main-frame">
+            
+            <!-- Decoracions de Personatges i Bomba -->
+            <ui:VisualElement name="decoration-container">
+                <ui:VisualElement name="bomb-sprite" class="decor-sprite" />
+                <ui:VisualElement name="dino-vita" class="decor-sprite dino-sprite" />
+            </ui:VisualElement>
+
+            <!-- Secció Esquerra: Identitat -->
+            <ui:VisualElement name="left-section" class="section">
+                <ui:VisualElement name="brand-container">
+                    <ui:Label text="TICK TACK" name="title-top" class="title-part" />
+                    <ui:Label text="TAG" name="title-bottom" class="title-part highlight" />
+                </ui:VisualElement>
+                <ui:VisualElement name="accent-line" />
+                <ui:Label text="PREPARA'T PER L'EXPLOSIÓ" name="tagline" />
+                <ui:Label text="BUILD v.1.2.0" name="version-label" />
+            </ui:VisualElement>
+
+            <!-- Separador Estilitzat -->
+            <ui:VisualElement name="vertical-divider">
+                <ui:VisualElement class="divider-dot top" />
+                <ui:VisualElement class="divider-line" />
+                <ui:VisualElement class="divider-dot bottom" />
+            </ui:VisualElement>
+
+            <!-- Secció Dreta: Acció -->
+            <ui:VisualElement name="right-section" class="section">
+                <ui:VisualElement name="form-container">
+                    <ui:VisualElement class="input-header">
+                        <ui:VisualElement class="square-accent" />
+                        <ui:Label text="IDENTIFICACIÓ" class="section-label" />
+                    </ui:VisualElement>
+                    
+                    <ui:TextField name="nickname-input" placeholder-text="EL TEU NICK" maxLength="12" />
+                    
+                    <ui:VisualElement class="spacer" />
+
+                    <ui:Label text="SELECCIONA MODE DE JOC" class="section-label small" />
+                    <ui:VisualElement name="button-group">
+                        <ui:Button text="VS BOT" name="btn-vs-bot" class="menu-btn bot-btn" />
+                        <ui:Button text="VS PLAYER" name="btn-vs-player" class="menu-btn player-btn" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 3
+  tags:
+  - Bot
+  - Ground
+  - Stairs
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - Stairs
+  - Water
+  - UI
+  - World
+  - Ground
+  - Background
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 148461189
+    locked: 0
+  - name: Stairs
+    uniqueID: 244963425
+    locked: 0
+  - name: Ground
+    uniqueID: 3726473747
+    locked: 0
+  - name: Player
+    uniqueID: 601627603
+    locked: 0
+  m_RenderingLayers:
+  - Default

@@ -1,19 +1,46 @@
-# Documentació
-Llistat d'alguns dels punts que han de quedar explicats en aquesta carpeta. Poden ser tots en aquest fitxer o en diversos fitxers enllaçats.
+# <p align="center">📚 Documentació: Tick-Tack Tag</p>
 
-És obligatori modificar aquest document!!
+Aquesta carpeta centralitza tots els recursos tècnics, diagrames i especificacions del projecte **Tick-Tack Tag**, desenvolupat per **Kim Galicio Lamar**.
 
-## Documentació bàsica MÍNIMA
- * Objectius
- * Arquitectura bàsica
-   * Tecnologies utilitzades
-   * Interrelació entre els diversos components
- * Com crees l'entorn de desenvolupament
- * Com desplegues l'aplicació a producció
- * Llistat d'endpoints de l'API de backend (també podeu documentar-ho amb swagger)
-    * Rutes
-   * Exemples de JSON de peticó
-   * Exemples de JSON de resposta i els seus codis d'estat 200? 404?
- * Aplicació Android
- * Altres elements importants.
- * ...
+---
+
+## 🗂️ Índex Principal
+
+### 🏛️ Context i Arquitectura (`doc/context/`)
+| Document | Descripció |
+| :--- | :--- |
+| 🎯 **[00_OBJECTIVE](context/00_OBJECTIVE.md)** | Visió general del projecte i resum del minijoc. |
+| 📏 **[01_SCOPE](context/01_SCOPE.md)** | Definicions d'abast, funcionalitats i limitacions. |
+| 🏗️ **[02_ARCHITECTURE](context/02_ARCHITECTURE.md)** | Stack tecnològic i interrelació de components. |
+| ⚖️ **[03_DECISIONS](context/03_DECISIONS.md)** | Justificació de les eleccions tècniques clau. |
+| 📋 **[04_CONVENTIONS](context/04_CONVENTIONS.md)** | Estàndards de codi i estructura del repositori. |
+| 📅 **[05_BACKLOG](context/05_BACKLOG.md)** | Gestió de tasques, priorització i estat actual. |
+| 🗺️ **[06_SYSTEM_MAP](context/06_SYSTEM_MAP.md)** | Diagrama Mermaid de la infraestructura del joc. |
+| 📜 **[prompts-log](../prompts-log.md)** | Log de traçabilitat amb els prompts utilitzats per a la creació del projecte. |
+
+### 🔍 Especificacions Tècniques (`doc/openspec/specs/`)
+* 📑 **[spec.md](openspec/specs/spec.md)**: Detall de les mecàniques de joc i flux de xarxa.
+* 🧱 **[foundations.md](openspec/specs/foundations.md)**: Bases teòriques i tècniques.
+* 📈 **[plan.md](openspec/specs/plan.md)**: Full de ruta i fases d'implementació.
+
+---
+
+## ⚙️ Configuració de l'Entorn
+
+### 🖥️ Client Unity
+- **Versió:** Unity 2022.3 LTS.
+- **Paquets Necessaris:** ML-Agents, Native WebSocket, UI Toolkit.
+- **Configuració:** Assegurar-se que el `NetworkManager` a l'escena inicial apunta a l'adreça correcta del backend.
+
+### 🌐 Backend Node.js i Producció
+1. Navega a `Backend/` per executar el servidor localment (amb `.env` i `npm start`).
+2. **Producció**: El joc i l'API estan desplegats en un servidor remot amb **Nginx** (WebGL i WebSockets) al domini `ticktack-tag.dam.inspedralbes.cat`.
+
+### 🗄️ Base de Dades MySQL
+- Importa el fitxer `database.sql` situat a `Backend/` per crear l'esquema necessari.
+- Configura les credencials al fitxer `.env` del backend (o al `docker-compose` de producció).
+
+---
+<p align="center">
+  <i>Part del projecte transversal TR3 - Creat per Kim Galicio Lamar</i>
+</p>

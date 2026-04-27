@@ -1,0 +1,19 @@
+{
+  "name": "tr3-joc-backend",
+  "version": "1.0.0",
+  "description": "Servidor backend per al joc multijugador TickTack-Tag",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "mysql2": "^3.22.1",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
