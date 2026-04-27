@@ -56,8 +56,8 @@
 ## 📂 Enllaços i Recursos
 - 📝 **Gestor de Tasques:** [Veure Backlog i Progrés](doc/context/05_BACKLOG.md)
 - 🖼️ **Disseny i Especificacions:** [Documentació OpenSpec](doc/openspec/specs/spec.md)
-- 🌐 **Estat de Producció:** *Entorn de desenvolupament local / Dockeritzat*
-- 🚩 **Estat Actual:** `Fase de Poliment i Optimització 🚀`
+- 🌐 **Estat de Producció:** *Desplegat a producció (Nginx/WebGL)* a `ticktack-tag.dam.inspedralbes.cat`
+- 🚩 **Estat Actual:** `Versió Final Lliurada 🚀`
 
 ---
 

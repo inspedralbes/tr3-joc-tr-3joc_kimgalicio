@@ -32,14 +32,13 @@ Aquesta carpeta centralitza tots els recursos tècnics, diagrames i especificaci
 - **Paquets Necessaris:** ML-Agents, Native WebSocket, UI Toolkit.
 - **Configuració:** Assegurar-se que el `NetworkManager` a l'escena inicial apunta a l'adreça correcta del backend.
 
-### 🌐 Backend Node.js
-1. Navega a `Backend/`.
-2. Crea un fitxer `.env` basat en `.env.example`.
-3. Executa `npm install` i `npm start`.
+### 🌐 Backend Node.js i Producció
+1. Navega a `Backend/` per executar el servidor localment (amb `.env` i `npm start`).
+2. **Producció**: El joc i l'API estan desplegats en un servidor remot amb **Nginx** (WebGL i WebSockets) al domini `ticktack-tag.dam.inspedralbes.cat`.
 
 ### 🗄️ Base de Dades MySQL
 - Importa el fitxer `database.sql` situat a `Backend/` per crear l'esquema necessari.
-- Configura les credencials al fitxer `.env` del backend.
+- Configura les credencials al fitxer `.env` del backend (o al `docker-compose` de producció).
 
 ---
 <p align="center">
